@@ -55,7 +55,11 @@ int main(int argc, char *argv[]) {
       socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
   // BIND SOCKET TO PORT
-  bind(socket_fd, result->ai_addr, result->ai_addrlen);
+  int bind_status = bind(socket_fd, result->ai_addr, result->ai_addrlen);
+  if (bind_status == -1) {
+    printf("Error bindings socket to port\n");
+    return 1;
+  }
 
   // LISTENT TO PORT
   int listent_status = listen(socket_fd, 10);
