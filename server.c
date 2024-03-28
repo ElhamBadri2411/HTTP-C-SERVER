@@ -1,3 +1,4 @@
+#include "server.h"
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -8,8 +9,6 @@
 
 #define PORT "8080"
 #define BUFFER_SIZE 1024
-
-void handle_request(int client_fd);
 
 int main(int argc, char *argv[]) {
 
@@ -118,3 +117,18 @@ void handle_request(int client_fd) {
     return;
   }
 }
+
+int get_method(char *buffer) {
+  if (strncmp(buffer, "GET", 3) == 0) {
+    return GET;
+  } else if (strncmp(buffer, "POST", 4) == 0) {
+    return POST;
+  } else if (strncmp(buffer, "PUT", 3) == 0) {
+    return PUT;
+  } else if (strncmp(buffer, "DELETE", 6) == 0) {
+    return DELETE;
+  }
+  return -1;
+}
+
+int parse_headers(char *buffer, char *headers[]) { return 0; }
