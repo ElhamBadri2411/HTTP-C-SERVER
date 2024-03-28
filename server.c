@@ -4,6 +4,12 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
+
+#define PORT "8080"
+#define BUFFER_SIZE 1024
+
+void handle_request(int client_fd);
 
 int main(int argc, char *argv[]) {
 
@@ -17,7 +23,7 @@ int main(int argc, char *argv[]) {
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  status = getaddrinfo(argv[1], "8080", &hints, &result);
+  status = getaddrinfo(argv[1], PORT, &hints, &result);
 
   if (status != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
@@ -77,10 +83,38 @@ int main(int argc, char *argv[]) {
   incoming_socket_fd =
       accept(socket_fd, (struct sockaddr *)&their_addr, &addr_size);
 
-  // RECEIVE DATA (LOOP THROUGH UNTIL NO MORE DATA)
-  char buffer[100];
-  int response;
-  while ((response = recv(incoming_socket_fd, buffer, 100, 0)) > 0) {
-    printf("buffer %s\n", buffer);
+  while (1) {
+
+    // SEND DATA
+    handle_request(incoming_socket_fd);
+
+    // CLOSE CONNECTION
+    close(incoming_socket_fd);
+
+    return 0;
+  }
+}
+
+void handle_request(int client_fd) {
+  char buffer[BUFFER_SIZE];
+  ssize_t bytes_recived;
+
+  bytes_recived = recv(client_fd, buffer, BUFFER_SIZE, 0);
+  if (bytes_recived < 0) {
+    printf("Error reciving data\n");
+    return;
+  }
+
+  printf("Response:\n\n %s\n", buffer);
+
+  char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+                   "12\n\nHello world!";
+
+  printf("client_socket: %d\n", client_fd);
+  int bytes_sent = send(client_fd, response, strlen(response), 0);
+  printf("bytes_sent: %d\n", bytes_sent);
+  if (bytes_sent < 0) {
+    printf("Error sending data\n");
+    return;
   }
 }
