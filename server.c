@@ -1,6 +1,7 @@
 #include "server.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
   socket_fd =
       socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
+  setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
   // BIND SOCKET TO PORT
   int bind_status = bind(socket_fd, result->ai_addr, result->ai_addrlen);
   if (bind_status == -1) {
@@ -82,41 +84,71 @@ int main(int argc, char *argv[]) {
   incoming_socket_fd =
       accept(socket_fd, (struct sockaddr *)&their_addr, &addr_size);
 
-  while (1) {
+  // while (1) {
 
-    // SEND DATA
-    handle_request(incoming_socket_fd);
+  // SEND DATA
 
-    // CLOSE CONNECTION
-    close(incoming_socket_fd);
-
-    return 0;
-  }
-}
-
-void handle_request(int client_fd) {
   char buffer[BUFFER_SIZE];
   ssize_t bytes_recived;
 
-  bytes_recived = recv(client_fd, buffer, BUFFER_SIZE, 0);
+  bytes_recived = recv(incoming_socket_fd, buffer, BUFFER_SIZE, 0);
   if (bytes_recived < 0) {
     printf("Error reciving data\n");
-    return;
+    return 1;
   }
 
   printf("Response:\n\n %s\n", buffer);
 
-  char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
-                   "12\n\nHello world!";
+  if (validate_request(buffer) == false) {
+    printf("ERROR INVALID REQUEST\n");
+  }
 
-  printf("client_socket: %d\n", client_fd);
-  int bytes_sent = send(client_fd, response, strlen(response), 0);
+  char *content = "<h1 style=\"color:blue;font-size:21rem\" >Hello world!</h1>";
+  int content_length = strlen(content);
+  char *response;
+  asprintf(&response,
+           "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+           "%d\n\n%s",
+           content_length, content);
+
+  printf("client_socket: %d\n", incoming_socket_fd);
+  int bytes_sent = send(incoming_socket_fd, response, strlen(response), 0);
   printf("bytes_sent: %d\n", bytes_sent);
   if (bytes_sent < 0) {
     printf("Error sending data\n");
-    return;
+    return 1;
   }
+
+  // CLOSE CONNECTION
+  close(incoming_socket_fd);
+
+  return 0;
 }
+
+// void handle_request(int incoming_socket_fd) {
+//   char buffer[BUFFER_SIZE];
+//   ssize_t bytes_recived;
+
+//   bytes_recived = recv(incoming_socket_fd, buffer, BUFFER_SIZE, 0);
+//   if (bytes_recived < 0) {
+//     printf("Error reciving data\n");
+//     return;
+//   }
+
+//   printf("Response:\n\n %s\n", buffer);
+
+//   char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:
+//   "
+//                    "12\n\nHello world!";
+
+//   printf("client_socket: %d\n", incoming_socket_fd);
+//   int bytes_sent = send(incoming_socket_fd, response, strlen(response), 0);
+//   printf("bytes_sent: %d\n", bytes_sent);
+//   if (bytes_sent < 0) {
+//     printf("Error sending data\n");
+//     return;
+//   }
+// }
 
 int get_method(char *buffer) {
   if (strncmp(buffer, "GET", 3) == 0) {
@@ -132,3 +164,21 @@ int get_method(char *buffer) {
 }
 
 int parse_headers(char *buffer, char *headers[]) { return 0; }
+
+bool validate_request(char *buffer) {
+  char *lines[3];
+  char *line = strtok(buffer, "\n");
+  printf("line: %s\n", line);
+  // int i = 0;
+  // while (line != NULL) {
+  //   lines[i] = line;
+  //   line = strtok(NULL, "\n");
+  //   i++;
+  // }
+
+  // if (get_method(lines[0]) == -1) {
+  //   return false;
+  // }
+
+  return true;
+}
