@@ -1,7 +1,6 @@
 # C Server (IN PROGRESS)
 
 This is a simple http server implementation in C.
-(currently in progress)
 
 ## Prerequisites
 
@@ -13,12 +12,15 @@ This is a simple http server implementation in C.
 
 1. Clone the repository:
 
-`bash
-   git clone https://github.com/yourusername/c-server.git
-   `
+   ```bash
+   git clone https://github.com/yourusername/c-server.git
+   ```
 
 2. Compile the server:
 
-`bash
-   make all
-   ` 3. Run the server ./server 4. The server will be listening on PORT 8080
+   ```bash
+   make all
+   ```
+
+3. Run the server ./bin/server
+4. The server will be listening on PORT 8080
