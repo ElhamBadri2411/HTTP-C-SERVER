@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 #define PORT "8080"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
 
 int main(int argc, char *argv[]) {
 
@@ -112,11 +112,12 @@ int main(int argc, char *argv[]) {
 
     bytes_recived = recv(incoming_socket_fd, buffer, BUFFER_SIZE, 0);
     if (bytes_recived < 0) {
-      printf("Error reciving data\n");
+      printf("error reciving data\n");
       return 1;
     }
 
-    if (validate_request(buffer) == false) {
+    request req;
+    if (validate_request(buffer, &req) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
 
@@ -132,6 +133,7 @@ int main(int argc, char *argv[]) {
     printf("client_socket: %d\n", incoming_socket_fd);
     int bytes_sent = send(incoming_socket_fd, response, strlen(response), 0);
     printf("bytes_sent: %d\n", bytes_sent);
+    printf("bytes_received: %d\n", bytes_recived);
     if (bytes_sent < 0) {
       printf("Error sending data\n");
       return 1;
@@ -153,42 +155,51 @@ int get_http_verb(char *buffer) {
   } else if (strncmp(buffer, "DELETE", 6) == 0) {
     return DELETE;
   }
-  return -1;
+  return INVALID;
 }
 
 int parse_headers(char *buffer, char *headers[]) { return 0; }
 
-bool validate_status_line(char *buffer) {
+bool validate_status_line(char *buffer, request *req) {
   char *token;
 
   token = strtok(buffer, " ");
 
   if (token == NULL) {
+    perror("Blank request line\n");
     return false; // No tokens found
   }
-  if (get_http_verb(token) == -1) {
+  enum HTTP_VERBS verb = get_http_verb(token);
+  if (verb == INVALID) {
+    perror("Invalid HTTP Verb\n");
     return false; // Invalid HTTP Verb
   }
 
+  req->verb = verb;
   token = strtok(NULL, " ");
 
   if (token == NULL || strlen(token) == 0) {
+    perror("Empty or missing Request Target\n");
     return false; // Empty or missing Request Target
   }
+  req->uri = token;
 
   token = strtok(NULL, " ");
 
   if (token == NULL || strncmp(token, "HTTP/1.1", 8) != 0) {
+    perror("Invalid or missing HTTP Version, please ensure that you're sending "
+           "an HTTP/1.1 request\n");
     return false; // Invalid or missing HTTP Version
   }
 
   return true;
 }
 
-bool validate_request(char *buffer) {
-  if (validate_status_line(buffer) == false) {
+bool validate_request(char *buffer, request *req) {
+  if (validate_status_line(buffer, req) == false) {
     return false;
   }
-
+  req->header_count = 0;
+  print_http_request(req);
   return true;
 }
