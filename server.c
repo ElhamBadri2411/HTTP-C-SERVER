@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
   struct addrinfo *c;
   // iterate through the addrinfo results from getaddrinfo
   for (c = result; c != NULL; c = c->ai_next) {
-    printf("count: %d\n", ++count);
     if (c->ai_family == AF_INET) { // IPv4
       // cast to IPv4 struct
       struct sockaddr_in *ipv4 = (struct sockaddr_in *)c->ai_addr;
@@ -86,6 +85,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  freeaddrinfo(result);
+
   // LISTENT TO PORT
   int listen_status = listen(socket_fd, 10);
   if (listen_status == -1) {
@@ -116,8 +117,10 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
+    *(buffer + bytes_recived + 1) = '\0';
+
     request req;
-    if (validate_request(buffer, &req) == false) {
+    if (handle_request(buffer, &req) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
 
@@ -158,7 +161,17 @@ int get_http_verb(char *buffer) {
   return INVALID;
 }
 
-int parse_headers(char *buffer, char *headers[]) { return 0; }
+bool parse_headers(char *buffer, request *req) {
+
+  char *header = strtok(buffer, "\r\n"); // Split by newline to separate headers
+  while (header != NULL) {
+    if (strlen(header) > 0) {
+      strcpy(req->headers[req->header_count++], header);
+    }
+    header = strtok(NULL, "\r\n"); // Move to the next header
+  }
+  return true;
+}
 
 bool validate_status_line(char *buffer, request *req) {
   char *token;
@@ -195,11 +208,16 @@ bool validate_status_line(char *buffer, request *req) {
   return true;
 }
 
-bool validate_request(char *buffer, request *req) {
+bool handle_request(char *buffer, request *req) {
+  printf("\n\n%s\n\n", buffer);
+  req->header_count = 0;
   if (validate_status_line(buffer, req) == false) {
     return false;
   }
-  req->header_count = 0;
+  if (parse_headers(buffer, req) == false) {
+    return false;
+  }
+
   print_http_request(req);
   return true;
 }

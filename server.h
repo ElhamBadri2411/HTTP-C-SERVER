@@ -24,6 +24,6 @@ typedef struct http_response {
 
 bool validate_status_line(char *buffer, request *req);
 int get_http_verb(char *buffer);
-int parse_headers(char *buffer, char *headers[]);
-bool validate_request(char *buffer, request *req);
+bool parse_headers(char *buffer, request *req);
+bool handle_request(char *buffer, request *req);
 #endif // SERVER_H
