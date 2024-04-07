@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
 TARGET = bin/server
-OBJS = bin/server.o bin/utils.o
+OBJS = bin/server.o bin/utils.o bin/file.o
 BUILD_DIR = bin
 
 all: $(TARGET)
@@ -14,6 +14,9 @@ $(BUILD_DIR)/server.o: server.c server.h | $(BUILD_DIR)
 
 $(BUILD_DIR)/utils.o: utils.c utils.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c utils.c -o $(BUILD_DIR)/utils.o
+
+$(BUILD_DIR)/file.o: file.c file.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c file.c -o $(BUILD_DIR)/file.o
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

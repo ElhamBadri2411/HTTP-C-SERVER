@@ -5,6 +5,10 @@
 #include <string.h>
 
 char *lstrip(char *str) {
+  if (!str) {
+    return NULL;
+  }
+
   while (isspace(*str)) {
     str++;
   }
@@ -12,6 +16,9 @@ char *lstrip(char *str) {
 }
 
 char *rstrip(char *str) {
+  if (!str) {
+    return NULL;
+  }
   char *b = str + strlen(str);
 
   while (isspace(*b))
@@ -22,7 +29,26 @@ char *rstrip(char *str) {
   return str;
 }
 
-char *strip(char *str) { return lstrip(rstrip(str)); }
+char *strip(char *str) {
+
+  if (!str) {
+    return NULL;
+  }
+  return lstrip(rstrip(str));
+}
+
+char *strlower(char *str) {
+  if (!str) {
+    return NULL;
+  }
+  char *c;
+
+  for (c = str; c != '\0'; c++) {
+    tolower(*c);
+  }
+
+  return str;
+}
 
 void print_http_request(request *req) {
   printf("HTTP Request\n");

@@ -6,5 +6,7 @@ char *lstrip(char *str);
 char *rstrip(char *str);
 char *strip(char *str);
 
+char *strlower(char *str);
+
 void print_http_request(request *req);
 #endif // UTILS_H
