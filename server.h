@@ -4,14 +4,14 @@
 #define SERVER_H
 #include <stdbool.h>
 
-#define MAX_HEADER_COUNT 10
+#define MAX_HEADER_COUNT 20
+#define MAX_HEADER_LENGTH 1000
 enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
-typedef struct http_request {
+typedef struct http_request_metadata {
   int verb;
   char *uri;
-  char *headers[MAX_HEADER_COUNT];
-  char *body;
+  char headers[MAX_HEADER_COUNT][MAX_HEADER_LENGTH];
   int header_count;
 } request;
 
@@ -22,8 +22,7 @@ typedef struct http_response {
   char *body;
 } response;
 
-bool validate_status_line(char *buffer, request *req);
+bool parse_and_validate_request(char *buffer, request *req);
 int get_http_verb(char *buffer);
-bool parse_headers(char *buffer, request *req);
 bool handle_request(char *buffer, request *req);
 #endif // SERVER_H

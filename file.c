@@ -54,3 +54,7 @@ char *get_mime_type(char *filename) {
   }
   return "application/octet-stream";
 }
+
+char *get_mime_type_from_req(request *req) {
+  return strtok(req->headers[0], " ");
+}

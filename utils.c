@@ -51,11 +51,15 @@ char *strlower(char *str) {
 }
 
 void print_http_request(request *req) {
+
+  printf("header_count: %d\n", req->header_count);
   printf("HTTP Request\n");
   printf("Verb: %d\n", req->verb);
   printf("URI: %s\n", req->uri);
-  printf("Headers:\n");
+  printf("====Headers:====\n");
+
   for (int i = 0; i < req->header_count; i++) {
-    printf("%s\n", req->headers[i]);
+
+    printf("header %d: %s\n", i, req->headers[i]);
   }
 }

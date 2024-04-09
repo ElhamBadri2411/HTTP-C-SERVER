@@ -1,9 +1,11 @@
 #include "server.h"
+#include "file.h"
 #include "utils.h"
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -161,22 +163,12 @@ int get_http_verb(char *buffer) {
   return INVALID;
 }
 
-bool parse_headers(char *buffer, request *req) {
-
-  char *header = strtok(buffer, "\r\n"); // Split by newline to separate headers
-  while (header != NULL) {
-    if (strlen(header) > 0) {
-      strcpy(req->headers[req->header_count++], header);
-    }
-    header = strtok(NULL, "\r\n"); // Move to the next header
-  }
-  return true;
-}
-
-bool validate_status_line(char *buffer, request *req) {
+bool parse_and_validate_request(char *buffer, request *req) {
   char *token;
+  char *saveptr;
 
-  token = strtok(buffer, " ");
+  //======= HANDLE REQ LINE =========
+  token = strtok_r(buffer, " ", &saveptr);
 
   if (token == NULL) {
     perror("Blank request line\n");
@@ -189,15 +181,14 @@ bool validate_status_line(char *buffer, request *req) {
   }
 
   req->verb = verb;
-  token = strtok(NULL, " ");
-
+  token = strtok_r(NULL, " ", &saveptr);
   if (token == NULL || strlen(token) == 0) {
     perror("Empty or missing Request Target\n");
     return false; // Empty or missing Request Target
   }
   req->uri = token;
 
-  token = strtok(NULL, " ");
+  token = strtok_r(NULL, "\r\n", &saveptr);
 
   if (token == NULL || strncmp(token, "HTTP/1.1", 8) != 0) {
     perror("Invalid or missing HTTP Version, please ensure that you're sending "
@@ -205,16 +196,38 @@ bool validate_status_line(char *buffer, request *req) {
     return false; // Invalid or missing HTTP Version
   }
 
+  //======HANDLE HEADERS========
+
+  // need this because of wierd bug where strtok_r will skip 2 consecutive
+  // delimiters in this case it skips \r\n\r\n and treats the body as a header
+  // https://stackoverflow.com/questions/65916201/strtok-skips-more-than-one-delimiter-how-to-make-it-skip-only-one
+  char *saveptr_trailing = saveptr;
+  token = strtok_r(NULL, "\r\n", &saveptr);
+  strlcpy(req->headers[req->header_count], token, MAX_HEADER_LENGTH);
+  req->header_count++;
+
+  while (token != NULL) {
+    // add 1 here because saveptr off by 1 issues
+    if (token != (saveptr_trailing + 1)) {
+      break;
+    } else {
+      strlcpy(req->headers[req->header_count], token, MAX_HEADER_LENGTH);
+      req->header_count++;
+      saveptr_trailing = saveptr;
+      token = strtok_r(NULL, "\r\n", &saveptr);
+    }
+  }
+  //======== HANDLE BODY =======
+  // printf("typefromreq : %s\n", get_mime_type_from_req(req));
   return true;
 }
+
+bool parse_body(char *buffer, char *saveptr, request req) {}
 
 bool handle_request(char *buffer, request *req) {
   printf("\n\n%s\n\n", buffer);
   req->header_count = 0;
-  if (validate_status_line(buffer, req) == false) {
-    return false;
-  }
-  if (parse_headers(buffer, req) == false) {
+  if (parse_and_validate_request(buffer, req) == false) {
     return false;
   }
 
