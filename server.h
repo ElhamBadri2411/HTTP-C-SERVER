@@ -13,6 +13,7 @@ typedef struct http_request_metadata {
   char *uri;
   char headers[MAX_HEADER_COUNT][MAX_HEADER_LENGTH];
   int header_count;
+  int response_fd;
 } request;
 
 typedef struct http_response {
@@ -25,4 +26,5 @@ typedef struct http_response {
 bool parse_and_validate_request(char *buffer, request *req);
 int get_http_verb(char *buffer);
 bool handle_request(char *buffer, request *req);
+void handle_get_request(request *req);
 #endif // SERVER_H

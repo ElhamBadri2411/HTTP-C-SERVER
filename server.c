@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -33,7 +34,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  int count = 0;
   struct addrinfo *c;
   // iterate through the addrinfo results from getaddrinfo
   for (c = result; c != NULL; c = c->ai_next) {
@@ -122,27 +122,36 @@ int main(int argc, char *argv[]) {
     *(buffer + bytes_recived + 1) = '\0';
 
     request req;
+    req.response_fd = incoming_socket_fd;
     if (handle_request(buffer, &req) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
 
-    char *content =
-        "<h1 style=\"color:blue;font-size:21rem\" >Hello world!</h1>";
-    int content_length = strlen(content);
-    char *response;
-    asprintf(&response,
-             "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
-             "%d\n\n%s",
-             content_length, content);
+    // if(strcmp(req.uri, "/") == 0){
 
-    printf("client_socket: %d\n", incoming_socket_fd);
-    int bytes_sent = send(incoming_socket_fd, response, strlen(response), 0);
-    printf("bytes_sent: %d\n", bytes_sent);
-    printf("bytes_received: %d\n", bytes_recived);
-    if (bytes_sent < 0) {
-      printf("Error sending data\n");
-      return 1;
-    }
+    // }
+    // char *content =
+    //     "<h1 style=\"color:blue;font-size:21rem\" >Hello world!</h1>";
+    // int content_length = strlen(content) + 100;
+    // char *response;
+    // asprintf(&response,
+    //          "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+    //          "%d\n\n%s",
+    //          content_length, content);
+
+    // printf("client_socket: %d\n", incoming_socket_fd);
+    // int bytes_sent = send(incoming_socket_fd, response, strlen(response), 0);
+    // send(incoming_socket_fd,
+    //      "<h2>"
+    //      "122222222222222222222222222222222222222222222222222222222222222222222"
+    //      "222222222222222222222</h2>",
+    //      100, 0);
+    // printf("bytes_sent: %d\n", bytes_sent);
+    // printf("bytes_received: %d\n", bytes_recived);
+    // if (bytes_sent < 0) {
+    //   printf("Error sending data\n");
+    //   return 1;
+    // }
 
     // CLOSE CONNECTION
     close(incoming_socket_fd);
@@ -222,12 +231,64 @@ bool parse_and_validate_request(char *buffer, request *req) {
   return true;
 }
 
-bool parse_body(char *buffer, char *saveptr, request req) {}
+void handle_get_request(request *req) {
+  char *filename = malloc(200);
+  char *mime_type = get_mime_type(req->uri);
+
+  struct stat file_stat;
+  asprintf(&filename, "files%s", req->uri);
+
+  if (stat(filename, &file_stat) == -1) {
+    return;
+  }
+
+  if (!S_ISREG(file_stat.st_mode)) { 
+    return;
+  }
+
+  long long content_length = (long long)file_stat.st_size;
+
+  FILE *f = fopen(filename, "rb");
+  free(filename);
+
+  if (f == NULL) {
+    perror("failed to open file");
+  } else {
+    char buffer[1024];
+    char *response_header;
+    asprintf(&response_header,
+             "HTTP/1.1 200 OK\nContent-Type: %s\nContent-Length: "
+             "%lld\n\n",
+             mime_type, content_length);
+    int sent =
+        send(req->response_fd, response_header, strlen(response_header), 0);
+    printf(" sent %d\n", sent);
+
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, 1024, f)) > 0) {
+      if (send(req->response_fd, buffer, bytes_read, 0) == -1) {
+        perror("Error sending file");
+        break;
+      }
+    }
+  }
+
+  fclose(f);
+}
 
 bool handle_request(char *buffer, request *req) {
   printf("\n\n%s\n\n", buffer);
   req->header_count = 0;
   if (parse_and_validate_request(buffer, req) == false) {
+    return false;
+  }
+
+  // execute request
+  switch (req->verb) {
+  case GET:
+    handle_get_request(req);
+    break;
+  default:
     return false;
   }
 

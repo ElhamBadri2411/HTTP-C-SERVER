@@ -1,0 +1,364 @@
+<!doctype html>
+<!--excited about my second homework site-->
+<html>
+    <head>
+        <title>Netflix - Watch TV Shows Online, Watch Movies Online</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+            zoom="1.0"
+        />
+        <!--for making the website more responsive-->
+        <meta http-equiv="X-UA-compatible" content="ie=" />
+        <!--for Favicon-->
+        <style>
+            :root {
+                --primary-color: #e50914;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: "Arial", sans-serif;
+                --webkit-font-smoothing: antialiased;
+                background: #000;
+                color: #999;
+                text-align: center;
+            }
+
+            ul {
+                list-style: none;
+            }
+
+            h1 {
+                font-size: 4rem;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4 {
+                color: #fff;
+            }
+
+            a {
+                color: #fff;
+                text-decoration: none;
+            }
+
+            p {
+                margin: 0.5rem 0;
+            }
+
+            img {
+                width: 100%;
+            }
+
+            .showcase {
+                width: 100%;
+                height: 93vh;
+                position: left;
+                background: url("https://raw.githubusercontent.com/Tsiangana/AOFlix/master/img/capa3.png")
+                    no-repeat center center/cover;
+                border-bottom: 8px solid #222;
+                text-indent: 5px;
+            }
+
+            .showcase-top {
+                position: absolute;
+                height: 130px;
+                width: 90px;
+                margin-left: 170px;
+                background-color: var(--primary-color);
+                color: #fff;
+                padding: 15px;
+                padding-top: 24px;
+                font-size: 14px;
+                font-weight: 600;
+                font-family: sans-serif;
+                cursor: pointer;
+            }
+
+            .showcase-top img {
+                width: 170px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-bottom: 8px solid #222;
+            }
+
+            nav {
+                float: right;
+                padding-top: 30px;
+                padding-right: 50px;
+            }
+
+            /* Button */
+            .btn {
+                display: inline-block;
+                background: var(--primary-color);
+                text-align: center;
+                border: none;
+                cursor: pointer;
+
+                margin-right: 0.5rem;
+                outline: none;
+                box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+                border-radius: 5px;
+                transition: background-color 0.4s;
+                padding: 0.5rem 1rem;
+            }
+
+            .btn:hover {
+                opacity: 0.7;
+            }
+
+            .btn-rounded {
+                border-radius: 5px;
+            }
+
+            .btn-x1 {
+                font-size: 1rem;
+                padding: 0.8rem 1.3rem;
+                text-transform: uppercase;
+            }
+
+            .search-box {
+                position: center;
+                transform: translate(-50, -50);
+                height: 60px;
+            }
+
+            input {
+                height: 49px;
+                width: 550px;
+                border-radius: 5px;
+                padding: 0px 10px;
+            }
+
+            .enjoy-tv {
+                font-size: 30px;
+                text-align: left;
+                position: relative;
+                padding: 150px 10%;
+                padding-left: 280px;
+                margin-bottom: 0;
+                background: 0 0;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                border-bottom: 8px solid #222;
+            }
+
+            .enjoy-tv img {
+                width: 450px;
+            }
+
+            .Watch-offline {
+                font-size: 30px;
+                text-align: left;
+                position: relative;
+                padding: 150px 10%;
+                margin-bottom: 0;
+                padding-left: 230px;
+                background: var(--primary-color);
+                color: #fff;
+                display: flex;
+                align-items: center;
+                border-bottom: 8px solid #222;
+            }
+
+            .Watch-offline img {
+                width: 450px;
+                margin-left: 20px;
+            }
+
+            .watch-everywhere {
+                font-size: 30px;
+                text-align: left;
+                position: relative;
+                padding: 150px 10%;
+                padding-left: 280px;
+                margin-bottom: 0;
+                color: #fff;
+                display: block;
+                border-bottom: 8px solid #222;
+                background: url("https://www.showmetech.com.br/wp-content/uploads//2023/04/imagem_2023-04-05_171218497.png.webp")
+                    no-repeat center center/cover;
+            }
+
+            .watch-everywhere img {
+                width: 450px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(+20%, -50%);
+                display: block;
+            }
+
+            .ask-question {
+                padding-top: 60px;
+                padding-bottom: 50px;
+            }
+
+            .ask-question h1 {
+                font-size: 50px;
+                padding-bottom: 50px;
+            }
+
+            .ask-question button {
+                display: center;
+                text-align: left;
+                background-color: #303030;
+                color: white;
+                height: 65px;
+                width: 700px;
+                font-size: 0.9rem;
+                padding: 0.3rem 0.5rem;
+                text-transform: uppercase;
+                border-radius: 2px;
+            }
+
+            .page-down {
+                border-top: 8px solid #222;
+                background-color: var(--primary-color);
+                font-size: 0.8rem;
+                margin-bottom: 1.5rem;
+                padding: 25px;
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                grid-gap: 0.5rem;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header class="showcase">
+            <div class="showcase-top">
+                <p>Best of the Week</p>
+            </div>
+
+            <nav>
+                <a href="#" class="btn btn-m">
+                    Sign in <i class="fas fa-chevron-right btn-icon"></i>
+                </a>
+            </nav>
+            <!--inside the following div we could write : style="background-image: url('https://img.techpowerup.org/200613/netflix-backgroung-image.jpg');"-->
+            <div class="showcase-content">
+                <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+                <h1>Unlimited movies, TV<br />shows and more...</h1>
+                <br /><br />
+                <div class="search-box">
+                    <input
+                        class="search-txt"
+                        type="text"
+                        name="box"
+                        placeholder="Email address."
+                    /><a href="#" class="btn btn-x1"
+                        >TRY IT NOW<i class="fas fa-chevron-right btn-icon"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h3>
+                    Ready to watch? Enter your Email to create or restart your
+                    membership.
+                </h3>
+                <br /><br />
+            </div>
+        </header>
+
+        <div class="enjoy-tv">
+            <div>
+                <h2>Enjoy on your TV.</h2>
+                <p>
+                    Watch on your smart-TV, PlayStation,<br />XBox, ChromeCast,
+                    AppleTV, blu-<br />ray players and more.
+                </p>
+            </div>
+            <img
+                src="https://t.ctcdn.com.br/hxMIOa4911i56IHic6sETQtHCBg=/1270x714/smart/i541471.jpeg"
+            />
+        </div>
+
+        <div class="Watch-offline">
+            <div>
+                <h2>Download your shows<br />to watch offline.</h2>
+                <p>
+                    Save your favourites easily and<br />always have something
+                    to watch.
+                </p>
+            </div>
+            <img
+                src="https://play-lh.googleusercontent.com/4DOuvVtWKp_dcvPvueS-g3tUQw08AtSgumH1b7iNlX4YkcwUyBcAsKWIljaDjxT3hKc=w526-h296-rw"
+            />
+        </div>
+
+        <div class="watch-everywhere">
+            <h2>Watch Everywhere.</h2>
+            <p>
+                Stream unlimited movies and TV<br />shows on your phon, tablet,
+                laptop,<br />and TV.
+            </p>
+        </div>
+
+        <div class="ask-question">
+            <h1>Frequently Asked Questions...</h1>
+            <button>What is Netfiix?</button><br /><br />
+            <button>How much does Netflix costs?</button><br /><br />
+            <button>Where can I watch?</button><br /><br />
+            <button>How do I cancel?</button><br /><br />
+            <button>What can I watch on netflix?</button>
+        </div>
+
+        <div>
+            <input
+                class="search-txt"
+                type="text"
+                name="box"
+                placeholder="Email address"
+            /><a href="#" class="btn btn-x1"
+                >TRY IT NOW><i class="fas fa-chevron-right btn-icon"></i
+            ></a>
+        </div>
+        <br />
+
+        <div>
+            <h3>
+                Ready to watch? Enter your email to create or restart your
+                membership.
+            </h3>
+            <br /><br />
+        </div>
+
+        <footer class="page-down">
+            <p style="font-weight: 600">
+                <a href="#">Quetions? Call 000-800-040-1842</a>
+            </p>
+            <p style="font-weight: 600"><a href="#">FAQ</a></p>
+            <p style="font-weight: 600"><a href="#">Investor Relations.</a></p>
+            <p style="font-weight: 600"><a href="#">Privacy.</a></p>
+            <p style="font-weight: 600"><a href="#">Speed Test.</a></p>
+            <p><a href="#">Netflix India</a></p>
+            <p><a href="#">Help Center.</a></p>
+            <p><a href="#">Jobs.</a></p>
+            <p><a href="#">Cookie Preference.</a></p>
+            <p><a href="#">Legal Notices.</a></p>
+            <p><a href="#">Account.</a></p>
+            <p><a href="#">Way to Watch.</a></p>
+            <p><a href="#">Corporate Information.</a></p>
+            <p><a href="#">Netflix Originals.</a></p>
+            <p><a href="#">Media Centre.</a></p>
+            <p><a href="#">Terms of Use.</a></p>
+            <p><a href="#">Contact us</a></p>
+        </footer>
+    </body>
+</html>
+<!--end of my shitty priject-->
