@@ -13,7 +13,7 @@ This is a simple http server implementation in C.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/c-server.git
+   git clone https://github.com/ElhamBadri2411/HTTP-C-SERVER.git
    ```
 
 2. Compile the server:
