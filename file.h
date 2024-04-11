@@ -6,5 +6,6 @@ char *get_file_extension(char *filename);
 char *get_mime_type(char *filename);
 char *get_mime_type_from_req(request *req);
 char *load_file(char);
+void serve_file(request *req);
 
 #endif // FILES_H
