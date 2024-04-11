@@ -1,5 +1,6 @@
 #include "server.h"
 #include "file.h"
+#include "routes_handler.h"
 #include "utils.h"
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -33,45 +34,8 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
     return 1;
   }
-
-  struct addrinfo *c;
-  // iterate through the addrinfo results from getaddrinfo
-  for (c = result; c != NULL; c = c->ai_next) {
-    if (c->ai_family == AF_INET) { // IPv4
-      // cast to IPv4 struct
-      struct sockaddr_in *ipv4 = (struct sockaddr_in *)c->ai_addr;
-
-      // get the pointer to the address
-      void *addr = &(ipv4->sin_addr);
-
-      // space to store the ip string
-      char ipstr[INET_ADDRSTRLEN];
-
-      // convert the IP to a string
-      inet_ntop(c->ai_family, addr, ipstr, sizeof(ipstr));
-
-      // print port number + ip
-      printf("PORT: %d\n", ntohs(ipv4->sin_port));
-      printf("IPV4: %s\n", ipstr);
-    } else { // IPv6
-
-      // cast the addr to IPv6 struct
-      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)c->ai_addr;
-
-      // get the pointer to the address
-      void *addr = &(ipv6->sin6_addr);
-
-      // space to store the ip
-      char ipstr[INET6_ADDRSTRLEN];
-
-      // covert the ip to a a string
-      inet_ntop(c->ai_family, addr, ipstr, sizeof(ipstr));
-
-      // print the port number + ip
-      printf("PORT: %d\n", ntohs(ipv6->sin6_port));
-      printf("IPV6: %s\n", ipstr);
-    }
-  }
+  // PRINT ADDRINFO
+  print_addr_info(result);
 
   // CREATE SOCKET
 
@@ -95,6 +59,8 @@ int main(int argc, char *argv[]) {
     printf("Error listening on port\n");
     return 1;
   }
+
+  route_table *rt = create_route_table(20);
 
   while (1) {
     // ACCEPT CONNECTION

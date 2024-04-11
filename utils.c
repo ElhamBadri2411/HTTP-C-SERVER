@@ -1,6 +1,8 @@
 #include "utils.h"
 #include "server.h"
+#include <arpa/inet.h>
 #include <ctype.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -61,5 +63,46 @@ void print_http_request(request *req) {
   for (int i = 0; i < req->header_count; i++) {
 
     printf("header %d: %s\n", i, req->headers[i]);
+  }
+}
+
+void print_addr_info(struct addrinfo *result) {
+  struct addrinfo *c;
+  // iterate through the addrinfo results from getaddrinfo
+  for (c = result; c != NULL; c = c->ai_next) {
+    if (c->ai_family == AF_INET) { // IPv4
+      // cast to IPv4 struct
+      struct sockaddr_in *ipv4 = (struct sockaddr_in *)c->ai_addr;
+
+      // get the pointer to the address
+      void *addr = &(ipv4->sin_addr);
+
+      // space to store the ip string
+      char ipstr[INET_ADDRSTRLEN];
+
+      // convert the IP to a string
+      inet_ntop(c->ai_family, addr, ipstr, sizeof(ipstr));
+
+      // print port number + ip
+      printf("PORT: %d\n", ntohs(ipv4->sin_port));
+      printf("IPV4: %s\n", ipstr);
+    } else { // IPv6
+
+      // cast the addr to IPv6 struct
+      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)c->ai_addr;
+
+      // get the pointer to the address
+      void *addr = &(ipv6->sin6_addr);
+
+      // space to store the ip
+      char ipstr[INET6_ADDRSTRLEN];
+
+      // covert the ip to a a string
+      inet_ntop(c->ai_family, addr, ipstr, sizeof(ipstr));
+
+      // print the port number + ip
+      printf("PORT: %d\n", ntohs(ipv6->sin6_port));
+      printf("IPV6: %s\n", ipstr);
+    }
   }
 }
