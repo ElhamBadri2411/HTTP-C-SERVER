@@ -35,6 +35,9 @@ void add_route(route_table *table, char *pattern, request_handler handler,
   unsigned long index = hash_rt(pattern) % table->size;
 
   route_entry *re = malloc(sizeof(route_entry));
+  if (re == NULL) {
+    return;
+  }
   re->handler = handler;
   re->verb = verb;
   re->pattern = strdup(pattern);

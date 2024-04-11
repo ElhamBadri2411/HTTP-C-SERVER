@@ -16,6 +16,9 @@
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
+bool handle_request(char *buffer, request *req, route_table *rt);
+void get_hello(request *req) { serve_file(req, "hello.html"); }
+
 int main(int argc, char *argv[]) {
 
   // LOAD UP ADRESS STRUCTS WITH getaddrinfo()
@@ -61,6 +64,7 @@ int main(int argc, char *argv[]) {
   }
 
   route_table *rt = create_route_table(20);
+  add_route(rt, "/hello", get_hello, GET);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -89,7 +93,7 @@ int main(int argc, char *argv[]) {
 
     request req;
     req.response_fd = incoming_socket_fd;
-    if (handle_request(buffer, &req) == false) {
+    if (handle_request(buffer, &req, rt) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
 
@@ -171,13 +175,12 @@ bool parse_and_validate_request(char *buffer, request *req) {
   return true;
 }
 
-void serve_file(request *req) {
+void serve_file(request *req, char *name) {
 
+  char *mime_type = get_mime_type(name);
   char *filename = malloc(200);
-  char *mime_type = get_mime_type(req->uri);
-
   struct stat file_stat;
-  asprintf(&filename, "files%s", req->uri);
+  asprintf(&filename, "files/%s", name);
 
   if (stat(filename, &file_stat) == -1) {
     return;
@@ -217,21 +220,26 @@ void serve_file(request *req) {
   fclose(f);
 }
 
-bool handle_request(char *buffer, request *req) {
+bool handle_request(char *buffer, request *req, route_table *rt) {
   printf("\n\n%s\n\n", buffer);
   req->header_count = 0;
   if (parse_and_validate_request(buffer, req) == false) {
     return false;
   }
 
+  route_entry *re = get_route(rt, req->uri, req->verb);
+  if (re == NULL)
+    return true;
+  re->handler(req);
+
   // execute request
-  switch (req->verb) {
-  case GET:
-    serve_file(req);
-    break;
-  default:
-    return false;
-  }
+  // switch (req->verb) {
+  // case GET:
+  //   serve_file(req);
+  //   break;
+  // default:
+  //   return false;
+  // }
 
   print_http_request(req);
   return true;
