@@ -77,7 +77,8 @@ void print_http_request(request *req) {
   printf("======Params======\n");
   for (int i = 0; i < req->param_count; i++) {
 
-    printf("param %d: %s\n", i, req->params[i]);
+    printf("param %d:key %s - val %s\n", i, req->params[i].key,
+           req->params[i].value);
   }
 }
 

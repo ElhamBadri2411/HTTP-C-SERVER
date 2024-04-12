@@ -157,11 +157,22 @@ bool parse_and_validate_request(char *buffer, request *req) {
     char *param = strtok(params, "&");
 
     while (param != NULL) {
-      strlcpy(req->params[req->param_count], param, MAX_PARAMS_LENGTH);
-      req->param_count++;
+      char *key_value_pair = strdup(param); // Create a copy
+      char *equals_sign = strchr(key_value_pair, '=');
+
+      if (equals_sign != NULL) {
+        *equals_sign = '\0';
+        keyval new_param;
+        new_param.key = key_value_pair;
+        new_param.value = equals_sign + 1;
+        req->params[req->param_count] = new_param;
+        req->param_count++;
+      } else {
+        free(key_value_pair);
+      }
+
       param = strtok(NULL, "&");
     }
-
   } else {
     req->uri = token;
   }

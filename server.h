@@ -10,12 +10,17 @@
 #define MAX_PARAMS_LENGTH 200
 enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
+typedef struct key_value_pair {
+  char *key;
+  char *value;
+} keyval;
+
 typedef struct http_request_metadata {
   int verb;
   char *uri;
   char headers[MAX_HEADER_COUNT][MAX_HEADER_LENGTH];
   int header_count;
-  char params[MAX_PARAMS_COUNT][MAX_PARAMS_LENGTH];
+  keyval params[MAX_PARAMS_COUNT];
   int param_count;
   int response_fd;
 } request;
