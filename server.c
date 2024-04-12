@@ -18,6 +18,8 @@
 
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
+void get_test(request *req) { serve_file(req, "test.html"); }
+void get_json(request *req) {}
 
 int main(int argc, char *argv[]) {
 
@@ -65,6 +67,7 @@ int main(int argc, char *argv[]) {
 
   route_table *rt = create_route_table(20);
   add_route(rt, "/hello", get_hello, GET);
+  add_route(rt, "/test", get_test, GET);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -135,11 +138,33 @@ bool parse_and_validate_request(char *buffer, request *req) {
 
   req->verb = verb;
   token = strtok_r(NULL, " ", &saveptr);
+
   if (token == NULL || strlen(token) == 0) {
+
     perror("Empty or missing Request Target\n");
     return false; // Empty or missing Request Target
   }
-  req->uri = token;
+
+  int param_location = has_params(token);
+
+  if (param_location != -1) {
+
+    token[param_location] = '\0';
+    req->uri = token;
+
+    char *params = token + param_location + 1;
+
+    char *param = strtok(params, "&");
+
+    while (param != NULL) {
+      strlcpy(req->params[req->param_count], param, MAX_PARAMS_LENGTH);
+      req->param_count++;
+      param = strtok(NULL, "&");
+    }
+
+  } else {
+    req->uri = token;
+  }
 
   token = strtok_r(NULL, "\r\n", &saveptr);
 
@@ -223,6 +248,7 @@ void serve_file(request *req, char *name) {
 bool handle_request(char *buffer, request *req, route_table *rt) {
   printf("\n\n%s\n\n", buffer);
   req->header_count = 0;
+  req->param_count = 0;
   if (parse_and_validate_request(buffer, req) == false) {
     return false;
   }
@@ -231,15 +257,6 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
   if (re == NULL)
     return true;
   re->handler(req);
-
-  // execute request
-  // switch (req->verb) {
-  // case GET:
-  //   serve_file(req);
-  //   break;
-  // default:
-  //   return false;
-  // }
 
   print_http_request(req);
   return true;

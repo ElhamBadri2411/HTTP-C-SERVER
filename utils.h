@@ -7,9 +7,11 @@
 char *lstrip(char *str);
 char *rstrip(char *str);
 char *strip(char *str);
+int has_params(char *str);
 
 char *strlower(char *str);
 
 void print_http_request(request *req);
 void print_addr_info(struct addrinfo *result);
+
 #endif // UTILS_H

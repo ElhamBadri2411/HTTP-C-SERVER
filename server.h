@@ -6,6 +6,8 @@
 
 #define MAX_HEADER_COUNT 20
 #define MAX_HEADER_LENGTH 1000
+#define MAX_PARAMS_COUNT 10
+#define MAX_PARAMS_LENGTH 200
 enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
 typedef struct http_request_metadata {
@@ -13,6 +15,8 @@ typedef struct http_request_metadata {
   char *uri;
   char headers[MAX_HEADER_COUNT][MAX_HEADER_LENGTH];
   int header_count;
+  char params[MAX_PARAMS_COUNT][MAX_PARAMS_LENGTH];
+  int param_count;
   int response_fd;
 } request;
 
