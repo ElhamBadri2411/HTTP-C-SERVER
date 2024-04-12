@@ -33,6 +33,7 @@ void param_test(request *req) {
 }
 void get_css(request *req) { serve_file(req, "index.css"); }
 void get_json(request *req) {}
+void notfound(request *req) { serve_file(req, "notfound.html"); }
 
 int main(int argc, char *argv[]) {
 
@@ -302,8 +303,10 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
   }
 
   route_entry *re = get_route(rt, req->uri, req->verb);
-  if (re == NULL)
+  if (re == NULL) {
+    notfound(req);
     return true;
+  }
   re->handler(req);
 
   print_http_request(req);
