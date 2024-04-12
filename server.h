@@ -2,18 +2,15 @@
 
 #ifndef SERVER_H
 #define SERVER_H
+#include "json.h"
 #include <stdbool.h>
 
 #define MAX_HEADER_COUNT 20
 #define MAX_HEADER_LENGTH 1000
 #define MAX_PARAMS_COUNT 10
 #define MAX_PARAMS_LENGTH 200
-enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
-typedef struct key_value_pair {
-  char *key;
-  char *value;
-} keyval;
+enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
 typedef struct http_request_metadata {
   int verb;
@@ -31,8 +28,6 @@ typedef struct http_response {
   char *headers[MAX_HEADER_COUNT];
   char *body;
 } response;
-
-char *get_val_from_key(char *key, keyval kv);
 
 // http parsing / validation functions
 bool parse_and_validate_request(char *buffer, request *req);

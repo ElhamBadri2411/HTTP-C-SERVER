@@ -1,5 +1,6 @@
 #include "server.h"
 #include "file.h"
+#include "json.h"
 #include "routes_handler.h"
 #include "utils.h"
 #include <arpa/inet.h>
@@ -31,7 +32,7 @@ void param_test(request *req) {
   serve_file(req, filename);
 }
 void get_css(request *req) { serve_file(req, "index.css"); }
-void get_json(request *req){}
+void get_json(request *req) {}
 
 int main(int argc, char *argv[]) {
 
@@ -307,11 +308,4 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
 
   print_http_request(req);
   return true;
-}
-
-char *get_val_from_key(char *key, keyval kv) {
-  if (strcmp(kv.key, key) == 0) {
-    return kv.value;
-  }
-  return NULL;
 }
