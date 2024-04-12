@@ -32,6 +32,8 @@ typedef struct http_response {
   char *body;
 } response;
 
+char *get_val_from_key(char *key, keyval kv);
+
 // http parsing / validation functions
 bool parse_and_validate_request(char *buffer, request *req);
 int get_http_verb(char *buffer);

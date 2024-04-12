@@ -19,7 +19,19 @@
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
 void get_test(request *req) { serve_file(req, "test.html"); }
-void get_json(request *req) {}
+void param_test(request *req) {
+  char *filename;
+  for (int i = 0; i < req->param_count; i++) {
+
+    char *val = get_val_from_key("filename", req->params[i]);
+    if (val != NULL)
+      filename = val;
+  }
+
+  serve_file(req, filename);
+}
+void get_css(request *req) { serve_file(req, "index.css"); }
+void get_json(request *req){}
 
 int main(int argc, char *argv[]) {
 
@@ -68,6 +80,8 @@ int main(int argc, char *argv[]) {
   route_table *rt = create_route_table(20);
   add_route(rt, "/hello", get_hello, GET);
   add_route(rt, "/test", get_test, GET);
+  add_route(rt, "/params", param_test, GET);
+  add_route(rt, "/index.css", get_css, GET);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -293,4 +307,11 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
 
   print_http_request(req);
   return true;
+}
+
+char *get_val_from_key(char *key, keyval kv) {
+  if (strcmp(kv.key, key) == 0) {
+    return kv.value;
+  }
+  return NULL;
 }
