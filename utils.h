@@ -8,6 +8,7 @@ char *lstrip(char *str);
 char *rstrip(char *str);
 char *strip(char *str);
 int has_params(char *str);
+int get_char_pos(char *str, char c);
 
 char *strlower(char *str);
 

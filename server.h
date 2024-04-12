@@ -18,7 +18,7 @@ typedef struct key_value_pair {
 typedef struct http_request_metadata {
   int verb;
   char *uri;
-  char headers[MAX_HEADER_COUNT][MAX_HEADER_LENGTH];
+  keyval headers[MAX_HEADER_COUNT];
   int header_count;
   keyval params[MAX_PARAMS_COUNT];
   int param_count;

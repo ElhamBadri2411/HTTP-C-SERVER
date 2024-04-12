@@ -192,16 +192,38 @@ bool parse_and_validate_request(char *buffer, request *req) {
   // https://stackoverflow.com/questions/65916201/strtok-skips-more-than-one-delimiter-how-to-make-it-skip-only-one
   char *saveptr_trailing = saveptr;
   token = strtok_r(NULL, "\r\n", &saveptr);
-  strlcpy(req->headers[req->header_count], token, MAX_HEADER_LENGTH);
-  req->header_count++;
+
+  char *colon = strchr(token, ':');
+
+  if (colon != NULL) {
+    char *key_value_pair = strdup(token);
+    *colon = '\0';
+    keyval new_header;
+    new_header.key = key_value_pair;
+    new_header.value = colon + 1;
+    req->headers[req->header_count] = new_header;
+    req->header_count++;
+  }
+
+  // strlcpy(req->headers[req->header_count], token, MAX_HEADER_LENGTH);
+  // req->header_count++;
 
   while (token != NULL) {
     // add 1 here because saveptr off by 1 issues
     if (token != (saveptr_trailing + 1)) {
       break;
     } else {
-      strlcpy(req->headers[req->header_count], token, MAX_HEADER_LENGTH);
-      req->header_count++;
+      int colon = get_char_pos(token, ':');
+
+      if (colon != -1) {
+        char *key_value_pair = strdup(token);
+        key_value_pair[colon] = '\0';
+        keyval new_header;
+        new_header.key = key_value_pair;
+        new_header.value = strip(key_value_pair + colon + 1);
+        req->headers[req->header_count] = new_header;
+        req->header_count++;
+      }
       saveptr_trailing = saveptr;
       token = strtok_r(NULL, "\r\n", &saveptr);
     }

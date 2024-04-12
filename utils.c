@@ -61,6 +61,14 @@ int has_params(char *str) {
   return -1;
 }
 
+int get_char_pos(char *str, char c) {
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (str[i] == c) {
+      return i;
+    }
+  }
+  return -1;
+}
 void print_http_request(request *req) {
 
   printf("header_count: %d\n", req->header_count);
@@ -71,14 +79,14 @@ void print_http_request(request *req) {
 
   for (int i = 0; i < req->header_count; i++) {
 
-    printf("header %d: %s\n", i, req->headers[i]);
+    printf("param %d: %s : %s\n", i, req->headers[i].key,
+           req->headers[i].value);
   }
 
   printf("======Params======\n");
   for (int i = 0; i < req->param_count; i++) {
 
-    printf("param %d:key %s - val %s\n", i, req->params[i].key,
-           req->params[i].value);
+    printf("param %d: %s : %s\n", i, req->params[i].key, req->params[i].value);
   }
 }
 
