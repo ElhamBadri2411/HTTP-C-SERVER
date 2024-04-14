@@ -7,4 +7,5 @@ typedef struct key_value_pair {
 } keyval;
 
 char *get_val_from_key(char *key, keyval kv);
+char *create_json_string(keyval kv[], int kv_len);
 #endif // JSON_H
