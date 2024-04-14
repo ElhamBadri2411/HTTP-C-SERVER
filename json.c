@@ -1,5 +1,7 @@
 
 #include "json.h"
+#include "server.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,4 +41,53 @@ char *create_json_string(keyval kv[], int kv_len) {
   json_string[offset] = '\0';
 
   return json_string;
+}
+
+keyval *create_keyvals_from_json_string(char *json_str) {
+  // we need to duplicate the string becuase string literals are stored in read
+  // only memory in C
+  char *json_string = malloc(strlen(json_str) + 1);
+  if (json_string == NULL) {
+    return NULL;
+  }
+  strcpy(json_string, json_str);
+  char *curr = json_string; // Pointer to traverse the string
+  int num_keyvals = 0;
+  keyval *kvs = NULL;
+
+  // Skip initial whitespace and opening brace
+  while (isspace(*curr) || *curr == '{')
+    curr++;
+
+  while (*curr != '\0' && *curr != '}') {
+
+    char *key_start = curr;
+    while (*curr != ':' && *curr != '\0')
+      curr++;
+    if (*curr != ':')
+      return NULL;
+    *curr = '\0'; // Terminate the key
+    curr++;
+
+    while (isspace(*curr) || *curr == ':')
+      curr++;
+
+    char *val_start = curr;
+    while (*curr != ',' && *curr != '}')
+      curr++;
+    curr++;
+    *(curr) = '\0'; // Terminate the value string
+
+    while (isspace(*curr) || *curr == ',')
+      curr++;
+    curr++;
+
+    // Allocate new keyval and store
+    kvs = realloc(kvs, (num_keyvals + 1) * sizeof(keyval));
+    kvs[num_keyvals].key = strdup(key_start);
+    kvs[num_keyvals].value = strdup(val_start);
+    num_keyvals++;
+  }
+
+  return kvs;
 }
