@@ -59,7 +59,7 @@ keyval *create_keyvals_from_json_string(char *json_str) {
   while (isspace(*curr) || *curr == '{')
     curr++;
 
-  while (*curr != '\0' && *curr != '}') {
+  while (*curr != '}') {
 
     char *key_start = curr;
     while (*curr != ':' && *curr != '\0')
@@ -75,7 +75,8 @@ keyval *create_keyvals_from_json_string(char *json_str) {
     char *val_start = curr;
     while (*curr != ',' && *curr != '}')
       curr++;
-    curr++;
+    if (*curr == '}')
+      *(curr + 1) = '}';
     *(curr) = '\0'; // Terminate the value string
 
     while (isspace(*curr) || *curr == ',')

@@ -79,7 +79,7 @@ void print_http_request(request *req) {
 
   for (int i = 0; i < req->header_count; i++) {
 
-    printf("param %d: %s : %s\n", i, req->headers[i].key,
+    printf("header %d: %s : %s\n", i, req->headers[i].key,
            req->headers[i].value);
   }
 
@@ -87,6 +87,11 @@ void print_http_request(request *req) {
   for (int i = 0; i < req->param_count; i++) {
 
     printf("param %d: %s : %s\n", i, req->params[i].key, req->params[i].value);
+  }
+  printf("======Body======\n");
+  for (int i = 0; i < 3; i++) {
+
+    printf("body %d: %s : %s\n", i, req->body[i].key, req->body[i].value);
   }
 }
 

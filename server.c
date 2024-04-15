@@ -19,6 +19,7 @@
 
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
+void post_stuff(request *req) {}
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
@@ -84,6 +85,7 @@ int main(int argc, char *argv[]) {
   add_route(rt, "/test", get_test, GET);
   add_route(rt, "/params", param_test, GET);
   add_route(rt, "/index.css", get_css, GET);
+  add_route(rt, "/user", post_stuff, POST);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -161,6 +163,7 @@ bool parse_and_validate_request(char *buffer, request *req) {
     return false; // Empty or missing Request Target
   }
 
+  //================HANDLE PARAMS====================
   int param_location = has_params(token);
 
   if (param_location != -1) {
@@ -245,7 +248,16 @@ bool parse_and_validate_request(char *buffer, request *req) {
     }
   }
   //======== HANDLE BODY =======
-  // printf("typefromreq : %s\n", get_mime_type_from_req(req));
+  // token = strtok_r(NULL, "}", &saveptr);
+
+  keyval *kv = create_keyvals_from_json_string(token);
+  req->body = kv;
+
+  printf("======Body======\n");
+  for (int i = 0; i < 3; i++) {
+
+    printf("body %d: %s : %s\n", i, req->body[i].key, req->body[i].value);
+  }
   return true;
 }
 
@@ -295,7 +307,6 @@ void serve_file(request *req, char *name) {
 }
 
 bool handle_request(char *buffer, request *req, route_table *rt) {
-  printf("\n\n%s\n\n", buffer);
   req->header_count = 0;
   req->param_count = 0;
   if (parse_and_validate_request(buffer, req) == false) {

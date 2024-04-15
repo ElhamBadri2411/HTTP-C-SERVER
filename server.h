@@ -6,13 +6,12 @@
 #include <stdbool.h>
 
 #define MAX_HEADER_COUNT 20
-#define MAX_HEADER_LENGTH 1000
 #define MAX_PARAMS_COUNT 10
-#define MAX_PARAMS_LENGTH 200
+#define BODY_JSON_COUNT 10
 
 enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 
-typedef struct http_request_metadata {
+typedef struct http_request {
   int verb;
   char *uri;
   keyval headers[MAX_HEADER_COUNT];
@@ -20,6 +19,7 @@ typedef struct http_request_metadata {
   keyval params[MAX_PARAMS_COUNT];
   int param_count;
   int response_fd;
+  keyval *body;
 } request;
 
 typedef struct http_response {
