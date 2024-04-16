@@ -248,16 +248,10 @@ bool parse_and_validate_request(char *buffer, request *req) {
     }
   }
   //======== HANDLE BODY =======
-  // token = strtok_r(NULL, "}", &saveptr);
 
-  keyval *kv = create_keyvals_from_json_string(token);
+  keyval *kv = create_keyvals_from_json_string(token, &req->body_count);
   req->body = kv;
 
-  printf("======Body======\n");
-  for (int i = 0; i < 3; i++) {
-
-    printf("body %d: %s : %s\n", i, req->body[i].key, req->body[i].value);
-  }
   return true;
 }
 
@@ -309,10 +303,12 @@ void serve_file(request *req, char *name) {
 bool handle_request(char *buffer, request *req, route_table *rt) {
   req->header_count = 0;
   req->param_count = 0;
+  req->body_count = 0;
   if (parse_and_validate_request(buffer, req) == false) {
     return false;
   }
 
+  write_to_db(req);
   route_entry *re = get_route(rt, req->uri, req->verb);
   if (re == NULL) {
     notfound(req);
@@ -322,4 +318,19 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
 
   print_http_request(req);
   return true;
+}
+
+void write_to_db(request *req) {
+  FILE *db = fopen("files/db.txt", "ab");
+  if (db == NULL) {
+    perror("failed to open db files");
+    fclose(db);
+  }
+
+  int json_size = 0;
+  char *json = create_json_string(req->body, req->body_count, &json_size);
+  fwrite(json, json_size, 1, db);
+  fwrite("###", 3, 1, db);
+  fclose(db);
+  return;
 }

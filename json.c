@@ -13,7 +13,7 @@ char *get_val_from_key(char *key, keyval kv) {
   return NULL;
 }
 
-char *create_json_string(keyval kv[], int kv_len) {
+char *create_json_string(keyval kv[], int kv_len, int *json_size) {
   int size = 2; // for the {}
 
   for (int i = 0; i < kv_len; i++) {
@@ -40,10 +40,11 @@ char *create_json_string(keyval kv[], int kv_len) {
 
   json_string[offset] = '\0';
 
+  *json_size = size + 1;
   return json_string;
 }
 
-keyval *create_keyvals_from_json_string(char *json_str) {
+keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   // we need to duplicate the string becuase string literals are stored in read
   // only memory in C
   char *json_string = malloc(strlen(json_str) + 1);
@@ -90,5 +91,6 @@ keyval *create_keyvals_from_json_string(char *json_str) {
     num_keyvals++;
   }
 
+  *count = num_keyvals;
   return kvs;
 }

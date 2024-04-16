@@ -20,6 +20,7 @@ typedef struct http_request {
   int param_count;
   int response_fd;
   keyval *body;
+  int body_count;
 } request;
 
 typedef struct http_response {

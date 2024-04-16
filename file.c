@@ -54,4 +54,3 @@ char *get_mime_type(char *filename) {
   }
   return "application/octet-stream";
 }
-
