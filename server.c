@@ -4,6 +4,7 @@
 #include "routes_handler.h"
 #include "utils.h"
 #include <arpa/inet.h>
+#include <math.h>
 #include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
   struct addrinfo *result = NULL;
   struct addrinfo hints;
 
-  db_response dbr = get_from_db(123);
+  db_response dbr = get_from_db(13);
   for (int i = 0; i < dbr.body_count; i++) {
 
     printf("body %d: %s : %s\n", i, dbr.body[i].key, dbr.body[i].value);
@@ -342,6 +343,10 @@ void write_to_db(request *req) {
 }
 
 db_response get_from_db(int id) {
+  int id_str_size = (int)((ceil(log10(id)) + 1) * sizeof(char));
+  char id_str[id_str_size];
+  snprintf(id_str, id_str_size, "%d", id);
+
   FILE *db = fopen("files/db.txt", "rb");
   if (db == NULL) {
     perror("failed to open db files");
@@ -356,7 +361,9 @@ db_response get_from_db(int id) {
     keyval *kv = create_keyvals_from_json_string(buffer, &count);
 
     for (int i = 0; i < count; i++) {
-      if (get_val_from_key("\"id\"", kv[i]) != NULL) {
+      if (get_val_from_key("\"id\"", kv[i]) != NULL &&
+          strncmp(get_val_from_key("\"id\"", kv[i]), id_str, id_str_size) ==
+              0) {
         fclose(db);
         db_response dbr;
         dbr.body = kv;
