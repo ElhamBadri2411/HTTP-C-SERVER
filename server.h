@@ -23,12 +23,10 @@ typedef struct http_request {
   int body_count;
 } request;
 
-typedef struct http_response {
-  int status_code;
-  char *status_line;
-  char *headers[MAX_HEADER_COUNT];
-  char *body;
-} response;
+typedef struct db_response {
+  keyval *body;
+  int body_count;
+} db_response;
 
 // http parsing / validation functions
 bool parse_and_validate_request(char *buffer, request *req);

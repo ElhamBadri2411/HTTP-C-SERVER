@@ -19,7 +19,7 @@
 
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
-void post_stuff(request *req) {}
+void post_stuff(request *req) { write_to_db(req); }
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
@@ -42,6 +42,13 @@ int main(int argc, char *argv[]) {
   struct addrinfo *result = NULL;
   struct addrinfo hints;
 
+  db_response dbr = get_from_db(123);
+  for (int i = 0; i < dbr.body_count; i++) {
+
+    printf("body %d: %s : %s\n", i, dbr.body[i].key, dbr.body[i].value);
+  }
+
+  return 0;
   int status;
 
   memset(&hints, 0, sizeof(hints));
@@ -308,7 +315,6 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
     return false;
   }
 
-  write_to_db(req);
   route_entry *re = get_route(rt, req->uri, req->verb);
   if (re == NULL) {
     notfound(req);
@@ -330,7 +336,36 @@ void write_to_db(request *req) {
   int json_size = 0;
   char *json = create_json_string(req->body, req->body_count, &json_size);
   fwrite(json, json_size, 1, db);
-  fwrite("###", 3, 1, db);
+  fwrite("\n", 1, 1, db);
   fclose(db);
   return;
+}
+
+db_response get_from_db(int id) {
+  FILE *db = fopen("files/db.txt", "rb");
+  if (db == NULL) {
+    perror("failed to open db files");
+    fclose(db);
+  }
+
+  char buffer[2048];
+  int count = 3;
+  while (fgets(buffer, sizeof(buffer), db)) {
+    // Parse JSON line (assuming you have a JSON parsing function)
+
+    keyval *kv = create_keyvals_from_json_string(buffer, &count);
+
+    for (int i = 0; i < count; i++) {
+      if (get_val_from_key("\"id\"", kv[i]) != NULL) {
+        fclose(db);
+        db_response dbr;
+        dbr.body = kv;
+        dbr.body_count = count;
+        return dbr;
+      }
+    }
+    free(kv);
+  }
+
+  fclose(db);
 }

@@ -94,3 +94,9 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   *count = num_keyvals;
   return kvs;
 }
+
+void free_keyvals(keyval *kv, int count) {
+  keyval *curr = kv;
+  for (int i = 0; i < count; i++) {
+  }
+}
