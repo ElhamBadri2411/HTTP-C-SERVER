@@ -7,7 +7,7 @@ BUILD_DIR = bin
 all: $(TARGET)
 
 $(TARGET): $(OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) -lm
 
 $(BUILD_DIR)/server.o: server.c server.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c server.c -o $(BUILD_DIR)/server.o

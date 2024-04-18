@@ -1,6 +1,6 @@
 #include "file.h"
 #include <string.h>
-#include <util.h>
+#include "utils.h"
 
 char *get_file_extension(char *filename) {
 

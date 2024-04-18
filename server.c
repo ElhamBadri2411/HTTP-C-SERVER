@@ -15,6 +15,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifndef _GNU_SOURCE
+#define  _GNU_SOURCE 1
+#endif
+
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
