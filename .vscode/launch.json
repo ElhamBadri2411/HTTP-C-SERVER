@@ -8,7 +8,15 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "buildServer"
-        },
+        },  {
+        "type": "cppdbg",
+        "request": "launch",
+        "name": "Debug with gdb",
+        "program": "/home/elham/projects/HTTP-C-SERVER/bin/server",
+        "cwd": "${workspaceFolder}",
+            "preLaunchTask": "buildServer"
+    }
+    ,
         {
             "type": "lldb",
             "request": "attach",

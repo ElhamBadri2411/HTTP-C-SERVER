@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 #ifndef _GNU_SOURCE
-#define  _GNU_SOURCE 1
+#define _GNU_SOURCE 1
 #endif
 
 #define PORT "8080"
@@ -28,8 +28,8 @@ void post_stuff(request *req) { write_to_db(req); }
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
-  for (int i = 0; i < req->param_count; i++) {
 
+  for (int i = 0; i < req->param_count; i++) {
     char *val = get_val_from_key("filename", req->params[i]);
     if (val != NULL)
       filename = val;
@@ -38,22 +38,33 @@ void param_test(request *req) {
   serve_file(req, filename);
 }
 void get_css(request *req) { serve_file(req, "index.css"); }
-void get_json(request *req) {}
-void notfound(request *req) { serve_file(req, "notfound.html"); }
+void get_json(request *req) {
+  int id;
+  char *ptr;
 
+  for (int i = 0; i < req->param_count; i++) {
+    char *val = get_val_from_key("id", req->params[i]);
+    printf("val = %s\n", val);
+    if (val != NULL) {
+      id = atoi(val);
+      printf("id : %d\n", id);
+
+      db_response dbr;
+      dbr = get_from_db(id);
+
+      print_db_response(dbr);
+      return;
+    }
+  }
+}
+void notfound(request *req) { serve_file(req, "notfound.html"); }
+// Parse JSON line (assuming you have a JSON parsing function)
 int main(int argc, char *argv[]) {
 
   // LOAD UP ADRESS STRUCTS WITH getaddrinfo()
   struct addrinfo *result = NULL;
   struct addrinfo hints;
 
-  db_response dbr = get_from_db(13);
-  for (int i = 0; i < dbr.body_count; i++) {
-
-    printf("body %d: %s : %s\n", i, dbr.body[i].key, dbr.body[i].value);
-  }
-
-  return 0;
   int status;
 
   memset(&hints, 0, sizeof(hints));
@@ -98,6 +109,7 @@ int main(int argc, char *argv[]) {
   add_route(rt, "/params", param_test, GET);
   add_route(rt, "/index.css", get_css, GET);
   add_route(rt, "/user", post_stuff, POST);
+  add_route(rt, "/json", get_json, GET);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -360,7 +372,6 @@ db_response get_from_db(int id) {
   char buffer[2048];
   int count = 3;
   while (fgets(buffer, sizeof(buffer), db)) {
-    // Parse JSON line (assuming you have a JSON parsing function)
 
     keyval *kv = create_keyvals_from_json_string(buffer, &count);
 

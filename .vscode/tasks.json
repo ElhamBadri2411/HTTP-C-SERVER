@@ -27,6 +27,10 @@
         {
             "label": "buildServer",
             "command": "make",
+        },
+        {
+            "label": "cwdp",
+            "command": "echo $workspaceFolder"
         }
     ],
     "version": "2.0.0"

@@ -14,5 +14,6 @@ char *strlower(char *str);
 
 void print_http_request(request *req);
 void print_addr_info(struct addrinfo *result);
+void print_db_response(db_response dbr);
 
 #endif // UTILS_H
