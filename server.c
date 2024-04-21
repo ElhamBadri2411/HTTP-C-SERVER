@@ -58,6 +58,24 @@ void get_json(request *req) {
   }
 }
 void notfound(request *req) { serve_file(req, "notfound.html"); }
+void delete_test(request *req) {
+
+  int id;
+  char *ptr;
+
+  for (int i = 0; i < req->param_count; i++) {
+    char *val = get_val_from_key("id", req->params[i]);
+    printf("val = %s\n", val);
+    if (val != NULL) {
+      id = atoi(val);
+      printf("id : %d\n", id);
+
+      delete_from_db(id);
+
+      return;
+    }
+  }
+}
 // Parse JSON line (assuming you have a JSON parsing function)
 int main(int argc, char *argv[]) {
 
@@ -110,6 +128,7 @@ int main(int argc, char *argv[]) {
   add_route(rt, "/index.css", get_css, GET);
   add_route(rt, "/user", post_stuff, POST);
   add_route(rt, "/json", get_json, GET);
+  add_route(rt, "/json", delete_test, DELETE);
 
   while (1) {
     // ACCEPT CONNECTION
@@ -390,4 +409,49 @@ db_response get_from_db(int id) {
   }
 
   fclose(db);
+}
+
+void delete_from_db(int id) {
+  int id_str_size = (int)((ceil(log10(id)) + 1) * sizeof(char));
+  char id_str[id_str_size];
+  snprintf(id_str, id_str_size, "%d", id);
+  bool found = false;
+
+  FILE *db = fopen("files/db.txt", "rb");
+  if (db == NULL) {
+    perror("failed to open db files");
+    fclose(db);
+  }
+
+  FILE *temp_db = fopen("files/temp.txt", "wb");
+  if (temp_db == NULL) {
+    perror("failed to open db files");
+    fclose(db);
+  }
+
+  char buffer[2048];
+  int count = 3;
+  while (fgets(buffer, sizeof(buffer), db)) {
+    found = false;
+
+    keyval *kv = create_keyvals_from_json_string(buffer, &count);
+
+    for (int i = 0; i < count; i++) {
+      if (get_val_from_key("\"id\"", kv[i]) != NULL &&
+          strncmp(get_val_from_key("\"id\"", kv[i]), id_str, id_str_size) ==
+              0) {
+        found = true;
+      }
+    }
+    if (!found) {
+      fwrite(buffer, strlen(buffer), 1, temp_db);
+    }
+    free(kv);
+  }
+
+  fclose(temp_db);
+  fclose(db);
+
+  remove("files/db.txt");
+  rename("files/temp.txt", "files/db.txt");
 }

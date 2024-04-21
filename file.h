@@ -9,5 +9,6 @@ char *load_file(char);
 void serve_file(request *req, char *name);
 void write_to_db(request *req);
 db_response get_from_db(int id);
+void delete_from_db(int id);
 
 #endif // FILES_H
