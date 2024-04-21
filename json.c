@@ -47,11 +47,13 @@ char *create_json_string(keyval kv[], int kv_len, int *json_size) {
 keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   // we need to duplicate the string becuase string literals are stored in read
   // only memory in C
+  printf("json_str %s\n", json_str);
   char *json_string = malloc(strlen(json_str) + 1);
+  printf("json_string %s\n", json_string);
   if (json_string == NULL) {
     return NULL;
   }
-  strcpy(json_string, json_str);
+  strncpy(json_string, json_str, strlen(json_str) + 1);
   char *curr = json_string; // Pointer to traverse the string
   int num_keyvals = 0;
   keyval *kvs = NULL;

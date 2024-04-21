@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
 
   if (status != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+    freeaddrinfo(&hints);
     return 1;
   }
   // PRINT ADDRINFO
@@ -118,6 +119,8 @@ int main(int argc, char *argv[]) {
   int bind_status = bind(socket_fd, result->ai_addr, result->ai_addrlen);
   if (bind_status == -1) {
     printf("Error bindings socket to port\n");
+    freeaddrinfo(&hints);
+    freeaddrinfo(result);
     return 1;
   }
 
@@ -301,8 +304,10 @@ bool parse_and_validate_request(char *buffer, request *req) {
   }
   //======== HANDLE BODY =======
 
-  keyval *kv = create_keyvals_from_json_string(token, &req->body_count);
-  req->body = kv;
+  if (token != NULL) {
+    keyval *kv = create_keyvals_from_json_string(token, &req->body_count);
+    req->body = kv;
+  }
 
   return true;
 }
@@ -356,6 +361,8 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
   req->header_count = 0;
   req->param_count = 0;
   req->body_count = 0;
+  if (!buffer)
+    return false;
   if (parse_and_validate_request(buffer, req) == false) {
     return false;
   }

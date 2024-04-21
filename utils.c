@@ -6,24 +6,19 @@
 #include <stdio.h>
 #include <string.h>
 
-char *lstrip(char *str)
-{
-  if (!str)
-  {
+char *lstrip(char *str) {
+  if (!str) {
     return NULL;
   }
 
-  while (isspace(*str))
-  {
+  while (isspace(*str)) {
     str++;
   }
   return str;
 }
 
-char *rstrip(char *str)
-{
-  if (!str)
-  {
+char *rstrip(char *str) {
+  if (!str) {
     return NULL;
   }
   char *b = str + strlen(str);
@@ -31,62 +26,51 @@ char *rstrip(char *str)
   while (isspace(*b))
     b--;
 
-  *(b + 1) = '\0';
+  if (b != str + strlen(str))
+    *(b + 1) = '\0';
 
   return str;
 }
 
-char *strip(char *str)
-{
+char *strip(char *str) {
 
-  if (!str)
-  {
+  if (!str) {
     return NULL;
   }
   return lstrip(rstrip(str));
 }
 
-char *strlower(char *str)
-{
-  if (!str)
-  {
+char *strlower(char *str) {
+  if (!str) {
     return NULL;
   }
   char *c;
 
-  for (c = str; c != '\0'; c++)
-  {
+  for (c = str; c != '\0'; c++) {
     tolower(*c);
   }
 
   return str;
 }
 
-int has_params(char *str)
-{
-  for (int i = 0; str[i] != '\0'; i++)
-  {
-    if (str[i] == '?')
-    {
+int has_params(char *str) {
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (str[i] == '?') {
       return i;
     }
   }
   return -1;
 }
 
-int get_char_pos(char *str, char c)
-{
-  for (int i = 0; str[i] != '\0'; i++)
-  {
-    if (str[i] == c)
-    {
+int get_char_pos(char *str, char c) {
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (str[i] == c) {
       return i;
     }
   }
   return -1;
 }
-void print_http_request(request *req)
-{
+void print_http_request(request *req) {
 
   printf("header_count: %d\n", req->header_count);
   printf("HTTP Request\n");
@@ -94,35 +78,29 @@ void print_http_request(request *req)
   printf("URI: %s\n", req->uri);
   printf("====Headers:====\n");
 
-  for (int i = 0; i < req->header_count; i++)
-  {
+  for (int i = 0; i < req->header_count; i++) {
 
     printf("header %d: %s : %s\n", i, req->headers[i].key,
            req->headers[i].value);
   }
 
   printf("======Params======\n");
-  for (int i = 0; i < req->param_count; i++)
-  {
+  for (int i = 0; i < req->param_count; i++) {
 
     printf("param %d: %s : %s\n", i, req->params[i].key, req->params[i].value);
   }
   printf("======Body======\n");
-  for (int i = 0; i < req->body_count; i++)
-  {
+  for (int i = 0; i < req->body_count; i++) {
 
     printf("body %d: %s : %s\n", i, req->body[i].key, req->body[i].value);
   }
 }
 
-void print_addr_info(struct addrinfo *result)
-{
+void print_addr_info(struct addrinfo *result) {
   struct addrinfo *c;
   // iterate through the addrinfo results from getaddrinfo
-  for (c = result; c != NULL; c = c->ai_next)
-  {
-    if (c->ai_family == AF_INET)
-    { // IPv4
+  for (c = result; c != NULL; c = c->ai_next) {
+    if (c->ai_family == AF_INET) { // IPv4
       // cast to IPv4 struct
       struct sockaddr_in *ipv4 = (struct sockaddr_in *)c->ai_addr;
 
@@ -138,9 +116,7 @@ void print_addr_info(struct addrinfo *result)
       // print port number + ip
       printf("PORT: %d\n", ntohs(ipv4->sin_port));
       printf("IPV4: %s\n", ipstr);
-    }
-    else
-    { // IPv6
+    } else { // IPv6
 
       // cast the addr to IPv6 struct
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)c->ai_addr;
@@ -161,11 +137,9 @@ void print_addr_info(struct addrinfo *result)
   }
 }
 
-void print_db_response(db_response dbr)
-{
+void print_db_response(db_response dbr) {
 
-  for (int i = 0; i < dbr.body_count; i++)
-  {
+  for (int i = 0; i < dbr.body_count; i++) {
     printf("body %d: %s : %s\n", i, dbr.body[i].key, dbr.body[i].value);
   }
 }
