@@ -8,6 +8,7 @@
 #define MAX_HEADER_COUNT 20
 #define MAX_PARAMS_COUNT 10
 #define BODY_JSON_COUNT 10
+#define _GNU_SOURCE 1
 
 enum HTTP_VERBS { GET, POST, PUT, DELETE, INVALID = -1 };
 

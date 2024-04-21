@@ -13,18 +13,19 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
 
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
+void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
-void post_stuff(request *req) { write_to_db(req); }
+void post_stuff(request *req) {
+  ;
+  write_to_db(req);
+}
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
@@ -40,7 +41,6 @@ void param_test(request *req) {
 void get_css(request *req) { serve_file(req, "index.css"); }
 void get_json(request *req) {
   int id;
-  char *ptr;
 
   for (int i = 0; i < req->param_count; i++) {
     char *val = get_val_from_key("id", req->params[i]);
@@ -52,7 +52,13 @@ void get_json(request *req) {
       db_response dbr;
       dbr = get_from_db(id);
 
+      int json_size;
+      char *json_string =
+          create_json_string(dbr.body, dbr.body_count, &json_size);
+
       print_db_response(dbr);
+      serve_json(json_string, req);
+
       return;
     }
   }
@@ -61,7 +67,6 @@ void notfound(request *req) { serve_file(req, "notfound.html"); }
 void delete_test(request *req) {
 
   int id;
-  char *ptr;
 
   for (int i = 0; i < req->param_count; i++) {
     char *val = get_val_from_key("id", req->params[i]);
@@ -89,7 +94,11 @@ int main(int argc, char *argv[]) {
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  status = getaddrinfo(argv[1], PORT, &hints, &result);
+  if (argc < 2) {
+    status = getaddrinfo("localhost", PORT, &hints, &result);
+  } else {
+    status = getaddrinfo(argv[1], PORT, &hints, &result);
+  }
 
   if (status != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
@@ -381,6 +390,7 @@ db_response get_from_db(int id) {
   int id_str_size = (int)((ceil(log10(id)) + 1) * sizeof(char));
   char id_str[id_str_size];
   snprintf(id_str, id_str_size, "%d", id);
+  db_response dbr = {.body = NULL, .body_count = 0};
 
   FILE *db = fopen("files/db.txt", "rb");
   if (db == NULL) {
@@ -399,7 +409,6 @@ db_response get_from_db(int id) {
           strncmp(get_val_from_key("\"id\"", kv[i]), id_str, id_str_size) ==
               0) {
         fclose(db);
-        db_response dbr;
         dbr.body = kv;
         dbr.body_count = count;
         return dbr;
@@ -407,7 +416,7 @@ db_response get_from_db(int id) {
     }
     free(kv);
   }
-
+  return dbr;
   fclose(db);
 }
 
@@ -454,4 +463,23 @@ void delete_from_db(int id) {
 
   remove("files/db.txt");
   rename("files/temp.txt", "files/db.txt");
+}
+
+void serve_json(char *json_string, request *req) {
+  int json_len = strlen(json_string);
+  char *mime_type = "application/json";
+
+  char *response_header;
+  asprintf(&response_header,
+           "HTTP/1.1 200 OK\nContent-Type: %s\nContent-Length: "
+           "%d\n\n",
+           mime_type, json_len);
+
+  send(req->response_fd, response_header, strlen(response_header), 0);
+
+  if (json_len != 0) {
+    if (send(req->response_fd, json_string, json_len, 0) == -1) {
+      perror("Error sending file");
+    }
+  }
 }
