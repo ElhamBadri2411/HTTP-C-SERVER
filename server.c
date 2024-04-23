@@ -22,10 +22,7 @@
 void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
-void post_stuff(request *req) {
-  ;
-  write_to_db(req);
-}
+void post_stuff(request *req) { write_to_db(req); }
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
@@ -76,6 +73,7 @@ void delete_test(request *req) {
       printf("id : %d\n", id);
 
       delete_from_db(id);
+      send_response_start(req, OK);
 
       return;
     }
@@ -489,4 +487,31 @@ void serve_json(char *json_string, request *req) {
       perror("Error sending file");
     }
   }
+}
+
+void get_response_type_string(enum RESPONSE_TYPE response_type,
+                              char *response_type_string) {
+  switch (response_type) {
+  case OK:
+    strncpy(response_type_string, "200 OK", 20);
+    break;
+  case CREATED:
+    strncpy(response_type_string, "201 Created", 20);
+    break;
+  default:
+    break;
+  }
+}
+
+void send_response_start(request *req, enum RESPONSE_TYPE response_type) {
+  char *response_header;
+  char response_type_string[50] = {0};
+
+  get_response_type_string(response_type, response_type_string);
+
+  asprintf(&response_header,
+           "HTTP/1.1 %s\nContent-Type: application/json\nContent-Length: "
+           "0\n\n",
+           response_type_string);
+  send(req->response_fd, response_header, strlen(response_header), 0);
 }
