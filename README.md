@@ -5,7 +5,7 @@ This is a simple http server implementation in C.
 ## Prerequisites
 
 - C compiler (e.g., GCC)
-- POSIX-compliant operating system (Linux, macOS, etc.)
+- POSIX-compliant operating system (Linux)
 - Make
 
 ## Usage
