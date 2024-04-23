@@ -1,4 +1,4 @@
-# C Server (IN PROGRESS)
+# C Server
 
 This is a simple http server implementation in C.
 
@@ -19,7 +19,7 @@ This is a simple http server implementation in C.
 2. Compile the server:
 
    ```bash
-   make all
+   make 
    ```
 
 3. Run the server ./bin/server
