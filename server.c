@@ -22,7 +22,10 @@
 void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
-void post_stuff(request *req) { write_to_db(req); }
+void post_stuff(request *req) {
+  write_to_db(req);
+  send_response_start(req, CREATED);
+}
 void get_test(request *req) { serve_file(req, "test.html"); }
 void param_test(request *req) {
   char *filename;
