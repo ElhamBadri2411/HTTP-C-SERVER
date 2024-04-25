@@ -44,10 +44,8 @@ void get_json(request *req) {
 
   for (int i = 0; i < req->param_count; i++) {
     char *val = get_val_from_key("id", req->params[i]);
-    printf("val = %s\n", val);
     if (val != NULL) {
       id = atoi(val);
-      printf("id : %d\n", id);
 
       db_response dbr;
       dbr = get_from_db(id);
@@ -55,8 +53,8 @@ void get_json(request *req) {
       int json_size;
       char *json_string =
           create_json_string(dbr.body, dbr.body_count, &json_size);
+      printf("json_string: %s\n", json_string);
 
-      print_db_response(dbr);
       serve_json(json_string, req);
 
       return;
@@ -424,6 +422,7 @@ db_response get_from_db(int id) {
     }
     free(kv);
   }
+  print_db_response(dbr);
   return dbr;
   fclose(db);
 }

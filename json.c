@@ -34,8 +34,8 @@ char *create_json_string(keyval kv[], int kv_len, int *json_size) {
 
   for (int i = 0; i < kv_len; i++) {
     char *end = i == kv_len - 1 ? "}" : ",";
-    offset += sprintf(json_string + offset, "\"%s\": \"%s\"%s", kv[i].key,
-                      kv[i].value, end);
+    offset +=
+        sprintf(json_string + offset, "%s: %s%s", kv[i].key, kv[i].value, end);
   }
 
   json_string[offset] = '\0';
