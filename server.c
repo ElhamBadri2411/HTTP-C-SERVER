@@ -22,6 +22,22 @@
 void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
+void put_json(request *req) {
+  int id;
+
+  // TODO: GET THE CORRECT KEYVAL
+  keyval kv;
+  char *val = get_val_from_key("id", kv);
+  if (val != NULL) {
+    id = atoi(val);
+
+    delete_from_db(id);
+    write_to_db(req);
+
+    return;
+  }
+  // write new kv
+}
 void post_stuff(request *req) {
   write_to_db(req);
   send_response_start(req, CREATED);
@@ -140,6 +156,7 @@ int main(int argc, char *argv[]) {
   add_route(rt, "/user", post_stuff, POST);
   add_route(rt, "/json", get_json, GET);
   add_route(rt, "/json", delete_test, DELETE);
+  add_route(rt, "/json", put_json, PUT);
 
   while (1) {
     // ACCEPT CONNECTION
