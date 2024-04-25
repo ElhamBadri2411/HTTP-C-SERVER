@@ -1,6 +1,5 @@
 
 #include "json.h"
-#include "server.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,16 +39,14 @@ char *create_json_string(keyval kv[], int kv_len, int *json_size) {
 
   json_string[offset] = '\0';
 
-  *json_size = size + 1;
+  *json_size = offset;
   return json_string;
 }
 
 keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   // we need to duplicate the string becuase string literals are stored in read
   // only memory in C
-  printf("json_str %s\n", json_str);
   char *json_string = malloc(strlen(json_str) + 1);
-  printf("json_string %s\n", json_string);
   if (json_string == NULL) {
     return NULL;
   }
@@ -97,8 +94,8 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   return kvs;
 }
 
-void free_keyvals(keyval *kv, int count) {
-  keyval *curr = kv;
-  for (int i = 0; i < count; i++) {
-  }
-}
+// void free_keyvals(keyval *kv, int count) {
+//   keyval *curr = kv;
+//   for (int i = 0; i < count; i++) {
+//   }
+// }

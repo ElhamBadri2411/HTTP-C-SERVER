@@ -299,10 +299,11 @@ bool parse_and_validate_request(char *buffer, request *req) {
       }
       saveptr_trailing = saveptr;
       token = strtok_r(NULL, "\r\n", &saveptr);
+      printf("token: %s\n", token);
     }
   }
-  //======== HANDLE BODY =======
 
+  //======== HANDLE BODY =======
   if (token != NULL) {
     keyval *kv = create_keyvals_from_json_string(token, &req->body_count);
     req->body = kv;
@@ -373,15 +374,16 @@ bool handle_request(char *buffer, request *req, route_table *rt) {
   }
   re->handler(req);
 
-  print_http_request(req);
   return true;
 }
 
 void write_to_db(request *req) {
   FILE *db = fopen("files/db.txt", "ab");
+  print_http_request(req);
   if (db == NULL) {
     perror("failed to open db files");
     fclose(db);
+    return;
   }
 
   int json_size = 0;
