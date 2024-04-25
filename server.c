@@ -23,20 +23,26 @@ void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
 void put_json(request *req) {
+  printf("\n\n====PUT====\n\n");
+  print_http_request(req);
   int id;
+  for (int i = 0; i < req->body_count; i++) {
+    char *val = get_val_from_key("\"id\"", req->body[i]);
+    printf("val = %s\n", req->body[i].key);
 
-  // TODO: GET THE CORRECT KEYVAL
-  keyval kv;
-  char *val = get_val_from_key("id", kv);
-  if (val != NULL) {
-    id = atoi(val);
+    if (val != NULL) {
 
-    delete_from_db(id);
-    write_to_db(req);
+      id = atoi(val);
+      printf("id: %d\n", id);
+      delete_from_db(id);
+      write_to_db(req);
+      send_response_start(req, OK);
 
-    return;
+      printf("\n\n====PUT====\n\n");
+      return;
+    }
   }
-  // write new kv
+  printf("\n\n====PUT====\n\n");
 }
 void post_stuff(request *req) {
   write_to_db(req);
@@ -153,7 +159,7 @@ int main(int argc, char *argv[]) {
   add_route(rt, "/test", get_test, GET);
   add_route(rt, "/params", param_test, GET);
   add_route(rt, "/index.css", get_css, GET);
-  add_route(rt, "/user", post_stuff, POST);
+  add_route(rt, "/json", post_stuff, POST);
   add_route(rt, "/json", get_json, GET);
   add_route(rt, "/json", delete_test, DELETE);
   add_route(rt, "/json", put_json, PUT);
