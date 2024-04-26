@@ -4,7 +4,6 @@
 #include "routes_handler.h"
 #include "utils.h"
 #include <arpa/inet.h>
-#include <bits/pthreadtypes.h>
 #include <math.h>
 #include <netdb.h>
 #include <pthread.h>
@@ -21,35 +20,25 @@
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
-struct thread_data {
-  char *buffer;
-  request *req;
-  route_table *rt;
-};
-
 void serve_json(char *json_string, request *req);
-bool handle_request(char *buffer, request *req, route_table *rt);
+bool handle_request(int incoming_socket_fd, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
 void put_json(request *req) {
   print_http_request(req);
   int id;
   for (int i = 0; i < req->body_count; i++) {
     char *val = get_val_from_key("\"id\"", req->body[i]);
-    printf("val = %s\n", req->body[i].key);
 
     if (val != NULL) {
 
       id = atoi(val);
-      printf("id: %d\n", id);
       delete_from_db(id);
       write_to_db(req);
       send_response_start(req, OK);
 
-      printf("\n\n====PUT====\n\n");
       return;
     }
   }
-  printf("\n\n====PUT====\n\n");
 }
 void post_stuff(request *req) {
   write_to_db(req);
@@ -82,7 +71,6 @@ void get_json(request *req) {
       int json_size;
       char *json_string =
           create_json_string(dbr.body, dbr.body_count, &json_size);
-      printf("json_string: %s\n", json_string);
 
       serve_json(json_string, req);
 
@@ -108,18 +96,6 @@ void delete_test(request *req) {
       return;
     }
   }
-}
-
-void *thread_handler(void *arg) {
-  int thread_index = 0;
-  struct thread_data *data = (struct thread_data *)arg;
-
-  bool result = handle_request(data->buffer, data->req, data->rt);
-
-  close(data->req->response_fd);
-  free(data);
-  free(data->buffer);
-  pthread_exit(NULL);
 }
 
 // Parse JSON line (assuming you have a JSON parsing function)
@@ -194,34 +170,12 @@ int main(int argc, char *argv[]) {
     incoming_socket_fd =
         accept(socket_fd, (struct sockaddr *)&their_addr, &addr_size);
 
-    // while (1) {
-
     // SEND DATA
-
-    char buffer[BUFFER_SIZE];
-    ssize_t bytes_recived;
-
-    bytes_recived = recv(incoming_socket_fd, buffer, BUFFER_SIZE, 0);
-    if (bytes_recived < 0) {
-      printf("error reciving data\n");
-      return 1;
-    }
-
-    *(buffer + bytes_recived + 1) = '\0';
-
-    request req;
-    req.response_fd = incoming_socket_fd;
-    struct thread_data *data = malloc(sizeof(struct thread_data));
-    data->buffer = buffer;
-    data->req = &req;
-    data->rt = rt;
-
-    if (handle_request(buffer, &req, rt) == false) {
+    if (handle_request(incoming_socket_fd, rt) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
 
     // CLOSE CONNECTION
-    close(incoming_socket_fd);
   }
   return 0;
 }
@@ -347,7 +301,6 @@ bool parse_and_validate_request(char *buffer, request *req) {
       }
       saveptr_trailing = saveptr;
       token = strtok_r(NULL, "\r\n", &saveptr);
-      printf("token: %s\n", token);
     }
   }
 
@@ -404,24 +357,40 @@ void serve_file(request *req, char *name) {
 
   fclose(f);
 }
+bool handle_request(int incoming_socket_fd, route_table *rt) {
 
-bool handle_request(char *buffer, request *req, route_table *rt) {
-  req->header_count = 0;
-  req->param_count = 0;
-  req->body_count = 0;
-  if (!buffer)
-    return false;
-  if (parse_and_validate_request(buffer, req) == false) {
+  char buffer[BUFFER_SIZE];
+  ssize_t bytes_recived;
+
+  bytes_recived = recv(incoming_socket_fd, buffer, BUFFER_SIZE, 0);
+  if (bytes_recived < 0) {
+    printf("error reciving data\n");
+    return 1;
+  }
+
+  *(buffer + bytes_recived + 1) = '\0';
+
+  request req;
+  req.response_fd = incoming_socket_fd;
+
+  req.header_count = 0;
+  req.param_count = 0;
+  req.body_count = 0;
+
+  if (parse_and_validate_request(buffer, &req) == false) {
+    close(incoming_socket_fd);
     return false;
   }
 
-  route_entry *re = get_route(rt, req->uri, req->verb);
+  route_entry *re = get_route(rt, req.uri, req.verb);
   if (re == NULL) {
-    notfound(req);
+    notfound(&req);
+    close(incoming_socket_fd);
     return true;
   }
-  re->handler(req);
+  re->handler(&req);
 
+  close(incoming_socket_fd);
   return true;
 }
 
@@ -467,7 +436,6 @@ db_response get_from_db(int id) {
         fclose(db);
         dbr.body = kv;
         dbr.body_count = count;
-        printf("found \n");
         return dbr;
       }
     }
