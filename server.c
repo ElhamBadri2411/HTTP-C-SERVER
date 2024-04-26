@@ -20,6 +20,11 @@
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
+struct thread_data {
+  int incoming_socket_fd;
+  route_table *rt;
+};
+
 void serve_json(char *json_string, request *req);
 bool handle_request(int incoming_socket_fd, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
@@ -96,6 +101,14 @@ void delete_test(request *req) {
       return;
     }
   }
+}
+
+void *thread_handler(void *arg) {
+  struct thread_data *data = (struct thread_data *)arg;
+
+  handle_request(data->incoming_socket_fd, data->rt);
+  free(data);
+  pthread_exit(NULL);
 }
 
 // Parse JSON line (assuming you have a JSON parsing function)
