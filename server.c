@@ -455,7 +455,7 @@ db_response get_from_db(int id) {
   }
 
   char buffer[2048];
-  int count = 3;
+  int count = 4;
   while (fgets(buffer, sizeof(buffer), db)) {
 
     keyval *kv = create_keyvals_from_json_string(buffer, &count);
@@ -467,12 +467,13 @@ db_response get_from_db(int id) {
         fclose(db);
         dbr.body = kv;
         dbr.body_count = count;
+        printf("found \n");
         return dbr;
       }
     }
     free(kv);
   }
-  print_db_response(dbr);
+
   return dbr;
   fclose(db);
 }

@@ -6,7 +6,6 @@
 #include <string.h>
 
 char *get_val_from_key(char *key, keyval kv) {
-  printf("kv.key = %s, key = %s\n", kv.key, key);
   if (strcmp(kv.key, key) == 0) {
     return kv.value;
   }
