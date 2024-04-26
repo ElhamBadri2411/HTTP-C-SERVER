@@ -4,8 +4,10 @@
 #include "routes_handler.h"
 #include "utils.h"
 #include <arpa/inet.h>
+#include <bits/pthreadtypes.h>
 #include <math.h>
 #include <netdb.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,11 +21,16 @@
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
+struct thread_data {
+  char *buffer;
+  request *req;
+  route_table *rt;
+};
+
 void serve_json(char *json_string, request *req);
 bool handle_request(char *buffer, request *req, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
 void put_json(request *req) {
-  printf("\n\n====PUT====\n\n");
   print_http_request(req);
   int id;
   for (int i = 0; i < req->body_count; i++) {
@@ -102,6 +109,19 @@ void delete_test(request *req) {
     }
   }
 }
+
+void *thread_handler(void *arg) {
+  int thread_index = 0;
+  struct thread_data *data = (struct thread_data *)arg;
+
+  bool result = handle_request(data->buffer, data->req, data->rt);
+
+  close(data->req->response_fd);
+  free(data);
+  free(data->buffer);
+  pthread_exit(NULL);
+}
+
 // Parse JSON line (assuming you have a JSON parsing function)
 int main(int argc, char *argv[]) {
 
@@ -191,6 +211,11 @@ int main(int argc, char *argv[]) {
 
     request req;
     req.response_fd = incoming_socket_fd;
+    struct thread_data *data = malloc(sizeof(struct thread_data));
+    data->buffer = buffer;
+    data->req = &req;
+    data->rt = rt;
+
     if (handle_request(buffer, &req, rt) == false) {
       printf("ERROR INVALID REQUEST\n");
     }
