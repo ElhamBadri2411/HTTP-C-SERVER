@@ -91,6 +91,7 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   }
 
   *count = num_keyvals;
+  free(json_string);
   return kvs;
 }
 

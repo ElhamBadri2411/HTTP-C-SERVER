@@ -78,6 +78,7 @@ void get_json(request *req) {
           create_json_string(dbr.body, dbr.body_count, &json_size);
 
       serve_json(json_string, req);
+      free(json_string);
 
       return;
     }
@@ -367,7 +368,6 @@ void serve_file(request *req, char *name) {
              mime_type, content_length);
     int sent =
         send(req->response_fd, response_header, strlen(response_header), 0);
-    printf(" sent %d\n", sent);
 
     size_t bytes_read;
     while ((bytes_read = fread(buffer, 1, 1024, f)) > 0) {
@@ -376,6 +376,7 @@ void serve_file(request *req, char *name) {
         break;
       }
     }
+    free(response_header);
   }
 
   fclose(f);
@@ -431,6 +432,8 @@ void write_to_db(request *req) {
   fwrite(json, json_size, 1, db);
   fwrite("\n", 1, 1, db);
   fclose(db);
+
+  free(json);
   return;
 }
 
@@ -525,6 +528,7 @@ void serve_json(char *json_string, request *req) {
            mime_type, json_len);
 
   send(req->response_fd, response_header, strlen(response_header), 0);
+  free(response_header);
 
   if (json_len != 0) {
     if (send(req->response_fd, json_string, json_len, 0) == -1) {
@@ -558,4 +562,5 @@ void send_response_start(request *req, enum RESPONSE_TYPE response_type) {
            "0\n\n",
            response_type_string);
   send(req->response_fd, response_header, strlen(response_header), 0);
+  free(response_header);
 }
