@@ -189,12 +189,16 @@ int main(int argc, char *argv[]) {
     incoming_socket_fd =
         accept(socket_fd, (struct sockaddr *)&their_addr, &addr_size);
 
-    // SEND DATA
-    if (handle_request(incoming_socket_fd, rt) == false) {
-      printf("ERROR INVALID REQUEST\n");
-    }
+    struct thread_data *data;
+    data = malloc(sizeof(struct thread_data));
 
-    // CLOSE CONNECTION
+    data->incoming_socket_fd = incoming_socket_fd;
+    data->rt = rt;
+    pthread_t thread;
+
+    if (pthread_create(&thread, NULL, thread_handler, data) != 0) {
+      printf("ERROR INVALID RESPONSE\n");
+    }
   }
   return 0;
 }
