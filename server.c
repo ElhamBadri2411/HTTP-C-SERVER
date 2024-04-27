@@ -111,6 +111,20 @@ void *thread_handler(void *arg) {
   pthread_exit(NULL);
 }
 
+route_table *setup_routes() {
+  route_table *rt = create_route_table(20);
+  add_route(rt, "/hello", get_hello, GET);
+  add_route(rt, "/test", get_test, GET);
+  add_route(rt, "/params", param_test, GET);
+  add_route(rt, "/index.css", get_css, GET);
+  add_route(rt, "/json", post_stuff, POST);
+  add_route(rt, "/json", get_json, GET);
+  add_route(rt, "/json", delete_test, DELETE);
+  add_route(rt, "/json", put_json, PUT);
+
+  return rt;
+}
+
 // Parse JSON line (assuming you have a JSON parsing function)
 int main(int argc, char *argv[]) {
 
@@ -163,15 +177,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  route_table *rt = create_route_table(20);
-  add_route(rt, "/hello", get_hello, GET);
-  add_route(rt, "/test", get_test, GET);
-  add_route(rt, "/params", param_test, GET);
-  add_route(rt, "/index.css", get_css, GET);
-  add_route(rt, "/json", post_stuff, POST);
-  add_route(rt, "/json", get_json, GET);
-  add_route(rt, "/json", delete_test, DELETE);
-  add_route(rt, "/json", put_json, PUT);
+  route_table *rt = setup_routes();
 
   while (1) {
     // ACCEPT CONNECTION
