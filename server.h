@@ -38,5 +38,6 @@ bool parse_and_validate_request(char *buffer, request *req);
 int get_http_verb(char *buffer);
 void get_response_type_string(enum RESPONSE_TYPE response_type,
                               char *response_type_string);
+void free_request(request *req);
 void send_response_start(request *req, enum RESPONSE_TYPE response_type);
 #endif // SERVER_H

@@ -25,6 +25,17 @@ struct thread_data {
   route_table *rt;
 };
 
+void free_request(request *req) {
+  // free headers
+  free_keyvals(req->headers, req->header_count);
+
+  // free params
+  free_keyvals(req->params, req->param_count);
+
+  // free body
+  free_keyvals(req->body, req->body_count);
+}
+
 void serve_json(char *json_string, request *req);
 bool handle_request(int incoming_socket_fd, route_table *rt);
 void get_hello(request *req) { serve_file(req, "hello.html"); }
@@ -414,6 +425,7 @@ bool handle_request(int incoming_socket_fd, route_table *rt) {
   }
   re->handler(&req);
 
+  free_request(&req);
   close(incoming_socket_fd);
   return true;
 }
@@ -465,7 +477,7 @@ db_response get_from_db(int id) {
         return dbr;
       }
     }
-    free(kv);
+    free_keyvals(kv, count);
   }
 
   return dbr;
