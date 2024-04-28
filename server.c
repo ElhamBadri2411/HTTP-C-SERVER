@@ -355,6 +355,8 @@ bool parse_and_validate_request(char *buffer, request *req) {
     }
   }
 
+  printf("header count %d\n", req->header_count);
+
   //======== HANDLE BODY =======
   if (token != NULL) {
     keyval *kv = create_keyvals_from_json_string(token, &req->body_count);
@@ -461,7 +463,6 @@ void write_to_db(request *req) {
   fwrite("\n", 1, 1, db);
   fclose(db);
 
-  free(json);
   return;
 }
 

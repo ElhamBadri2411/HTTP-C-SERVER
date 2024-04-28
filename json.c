@@ -5,25 +5,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *get_val_from_key(char *key, keyval kv) {
-  if (strcmp(kv.key, key) == 0) {
+char *get_val_from_key(char *key, keyval kv)
+{
+  if (strcmp(kv.key, key) == 0)
+  {
     return kv.value;
   }
   return NULL;
 }
 
-char *create_json_string(keyval kv[], int kv_len, int *json_size) {
+char *create_json_string(keyval kv[], int kv_len, int *json_size)
+{
   int size = 2; // for the {}
 
-  for (int i = 0; i < kv_len; i++) {
+  for (int i = 0; i < kv_len; i++)
+  {
     size += strlen(kv[i].key) + strlen(kv[i].value) + 7;
-    if (i != kv_len - 1) {
+    if (i != kv_len - 1)
+    {
       size += 1; // for ,
     }
   }
 
   char *json_string = malloc(size + 1);
-  if (json_string == NULL) {
+  if (json_string == NULL)
+  {
     return NULL;
   }
 
@@ -31,7 +37,8 @@ char *create_json_string(keyval kv[], int kv_len, int *json_size) {
 
   offset += sprintf(json_string, "{");
 
-  for (int i = 0; i < kv_len; i++) {
+  for (int i = 0; i < kv_len; i++)
+  {
     char *end = i == kv_len - 1 ? "}" : ",";
     offset +=
         sprintf(json_string + offset, "%s: %s%s", kv[i].key, kv[i].value, end);
@@ -43,11 +50,13 @@ char *create_json_string(keyval kv[], int kv_len, int *json_size) {
   return json_string;
 }
 
-keyval *create_keyvals_from_json_string(char *json_str, int *count) {
+keyval *create_keyvals_from_json_string(char *json_str, int *count)
+{
   // we need to duplicate the string becuase string literals are stored in read
   // only memory in C
   char *json_string = malloc(strlen(json_str) + 1);
-  if (json_string == NULL) {
+  if (json_string == NULL)
+  {
     return NULL;
   }
   strncpy(json_string, json_str, strlen(json_str) + 1);
@@ -59,7 +68,8 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   while (isspace(*curr) || *curr == '{')
     curr++;
 
-  while (*curr != '}') {
+  while (*curr != '}')
+  {
 
     char *key_start = curr;
     while (*curr != ':' && *curr != '\0')
@@ -95,12 +105,17 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   return kvs;
 }
 
-void free_keyvals(keyval *kvs, int count) {
-  if (kvs == NULL) {
+void free_keyvals(keyval *kvs, int count)
+{
+  if (kvs == NULL)
+  {
     return; // Nothing to free if kvs is NULL
   }
 
-  for (int i = 0; i < count; i++) {
+  for (int i = 0; i < count; i++)
+  {
+    char key = *kvs[i].key;
+    char value = *kvs[i].value;
     free(kvs[i].key);   // Free the 'key' string
     free(kvs[i].value); // Free the 'value' string
   }
