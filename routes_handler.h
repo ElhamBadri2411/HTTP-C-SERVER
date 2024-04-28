@@ -22,5 +22,6 @@ route_table *create_route_table(int size);
 void add_route(route_table *table, char *pattern, request_handler handler,
                enum HTTP_VERBS verb);
 route_entry *get_route(route_table *table, char *pattern, enum HTTP_VERBS verb);
+void free_route_table(route_table *table);
 
 #endif // ROUTES_HANDLER_H

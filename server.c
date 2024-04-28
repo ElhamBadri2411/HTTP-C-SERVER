@@ -7,6 +7,7 @@
 #include <math.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,10 +21,14 @@
 #define PORT "8080"
 #define BUFFER_SIZE 4096
 
+volatile sig_atomic_t sigint_recieved = 0;
+
 struct thread_data {
   int incoming_socket_fd;
   route_table *rt;
 };
+
+void sigint_handler(int signum) { sigint_recieved = 1; }
 
 void free_request(request *req) {
   // free headers
@@ -140,6 +145,16 @@ route_table *setup_routes() {
 // Parse JSON line (assuming you have a JSON parsing function)
 int main(int argc, char *argv[]) {
 
+  struct sigaction sa;
+  sa.sa_handler = sigint_handler;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = 0;
+
+  if (sigaction(SIGINT, &sa, NULL) == -1) {
+    perror("sigaction");
+    exit(-1);
+  }
+
   // LOAD UP ADRESS STRUCTS WITH getaddrinfo()
   struct addrinfo *result = NULL;
   struct addrinfo hints;
@@ -191,7 +206,7 @@ int main(int argc, char *argv[]) {
 
   route_table *rt = setup_routes();
 
-  while (1) {
+  while (!sigint_recieved) {
     // ACCEPT CONNECTION
     int incoming_socket_fd;
 
@@ -212,6 +227,7 @@ int main(int argc, char *argv[]) {
       printf("ERROR INVALID RESPONSE\n");
     }
   }
+  printf("\n\nbreak form loop\n\n");
   return 0;
 }
 
