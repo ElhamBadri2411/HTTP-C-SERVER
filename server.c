@@ -474,6 +474,7 @@ db_response get_from_db(int id) {
         fclose(db);
         dbr.body = kv;
         dbr.body_count = count;
+        free_keyvals(kv, count);
         return dbr;
       }
     }
