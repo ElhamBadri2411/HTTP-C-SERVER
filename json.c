@@ -95,8 +95,14 @@ keyval *create_keyvals_from_json_string(char *json_str, int *count) {
   return kvs;
 }
 
-// void free_keyvals(keyval *kv, int count) {
-//   keyval *curr = kv;
-//   for (int i = 0; i < count; i++) {
-//   }
-// }
+void free_keyvals(keyval *kvs, int count) {
+  if (kvs == NULL) {
+    return; // Nothing to free if kvs is NULL
+  }
+
+  for (int i = 0; i < count; i++) {
+    free(kvs[i].key);   // Free the 'key' string
+    free(kvs[i].value); // Free the 'value' string
+  }
+  free(kvs); // Free the array of keyval structs itself
+}

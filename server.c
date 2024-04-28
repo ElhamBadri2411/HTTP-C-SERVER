@@ -507,7 +507,7 @@ void delete_from_db(int id) {
     if (!found) {
       fwrite(buffer, strlen(buffer), 1, temp_db);
     }
-    free(kv);
+    free_keyvals(kv, count);
   }
 
   fclose(temp_db);
