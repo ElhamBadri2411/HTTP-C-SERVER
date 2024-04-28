@@ -60,3 +60,24 @@ route_entry *get_route(route_table *table, char *pattern,
 
   return NULL;
 }
+
+void free_route_table(route_table *rt) {
+  if (rt == NULL) {
+    return;
+  }
+
+  for (int i = 0; i < rt->size; i++) {
+    route_entry *current = rt->table[i];
+
+    while (current != NULL) {
+      route_entry *temp = current;
+      current = current->next;
+
+      free(temp->pattern);
+      free(temp);
+    }
+  }
+
+  free(rt->table);
+  free(rt);
+}

@@ -231,6 +231,8 @@ int main(int argc, char *argv[]) {
     }
   }
   printf("\n\nbreak form loop\n\n");
+  free_route_table(rt);
+
   return 0;
 }
 
@@ -465,6 +467,7 @@ void write_to_db(request *req) {
   fwrite(json, json_size, 1, db);
   fwrite("\n", 1, 1, db);
   fclose(db);
+  free(json);
 
   return;
 }
