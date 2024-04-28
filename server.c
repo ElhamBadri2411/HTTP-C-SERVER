@@ -31,11 +31,13 @@ struct thread_data {
 void sigint_handler(int signum) { sigint_recieved = 1; }
 
 void free_request(request *req) {
-  // free headers
-  free_keyvals(req->headers, req->header_count);
+  for (int i = 0; i < req->header_count; i++) {
+    free(req->headers[i].key);
+  }
 
-  // free params
-  free_keyvals(req->params, req->param_count);
+  for (int i = 0; i < req->param_count; i++) {
+    free(req->params[i].key);
+  }
 
   // free body
   free_keyvals(req->body, req->body_count);
@@ -95,6 +97,7 @@ void get_json(request *req) {
 
       serve_json(json_string, req);
       free(json_string);
+      free_keyvals(dbr.body, dbr.body_count);
 
       return;
     }
@@ -491,7 +494,6 @@ db_response get_from_db(int id) {
         fclose(db);
         dbr.body = kv;
         dbr.body_count = count;
-        free_keyvals(kv, count);
         return dbr;
       }
     }
